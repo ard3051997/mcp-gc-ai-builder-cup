@@ -72,7 +72,7 @@ aso = [
     "google-play-scraper>=1.2.0",
 ]
 orchestration = [
-    "google-antigravity>=0.1.0",
+    "google-antigravity>=0.1.22",
 ]
 all = [
     "play-store-mcp[analytics,aso,orchestration,gcs]",
