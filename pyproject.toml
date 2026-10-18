@@ -69,7 +69,7 @@ gcs = [
     "google-cloud-firestore>=2.16.0",
 ]
 aso = [
-    "google-play-scraper>=1.2.0",
+    "google-play-scraper>=1.2.7",
 ]
 orchestration = [
     "google-antigravity>=0.1.0",
