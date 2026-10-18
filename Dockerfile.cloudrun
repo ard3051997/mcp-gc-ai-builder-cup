@@ -1,0 +1,18 @@
+FROM node:24-slim AS web
+WORKDIR /web
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+FROM python:3.13-slim
+ENV PYTHONUNBUFFERED=1 PYTHONPATH=/app/src PORT=8080
+WORKDIR /app
+RUN pip install --no-cache-dir uv
+COPY pyproject.toml uv.lock README.md ./
+COPY src/ src/
+COPY rulebooks/ rulebooks/
+COPY config/ config/
+RUN uv sync --frozen --no-dev --all-extras || uv sync --no-dev --all-extras
+COPY --from=web /web/dist frontend/dist
+CMD ["sh", "-c", "uv run --no-sync uvicorn api_server.main:app --host 0.0.0.0 --port ${PORT}"]

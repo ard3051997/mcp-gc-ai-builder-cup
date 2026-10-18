@@ -1,0 +1,4 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "Dockerfile.cloudrun", "-t", "asia-south1-docker.pkg.dev/aibuildercup-mcpgc-181248/app/mcp-gc:latest", "."]
+images: ["asia-south1-docker.pkg.dev/aibuildercup-mcpgc-181248/app/mcp-gc:latest"]

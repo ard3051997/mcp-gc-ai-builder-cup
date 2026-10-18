@@ -1,0 +1,11 @@
+.venv
+node_modules
+.git
+*.env
+.env*
+data/*.db
+*.csv
+scratch
+wiki
+docs
+**/__pycache__

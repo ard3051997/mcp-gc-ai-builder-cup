@@ -1,0 +1,43 @@
+/mcp# App Rule Book: Huge Digital Clock Pro
+package_name: "com.cama.app.huge80sclockPro"
+last_updated: "2026-06-11"
+
+# --- Metadata Constraints ---
+metadata_constraints:
+  title:
+    max_length: 50
+    required_keywords: ["Huge", "Digital Clock"]
+  short_description:
+    max_length: 80
+  full_description:
+    max_length: 4000
+    prohibited_keywords:
+      - "lock screen" # CRITICAL: App is explicitly NOT for the lock screen to prevent negative reviews.
+
+# --- Monetization Policy ---
+monetization:
+  status: "organic_experiment"
+  has_ads: false
+  has_subscriptions: false
+  allowed_ad_budget_monthly: 0.00
+  revenue_gate_type: "none"
+
+# --- Safety & Interception ---
+safety_rules:
+  require_telegram_approval: true
+  interceptor_tools:
+    - "play_store/update_listing"
+    - "play_store/deploy_app"
+  telegram_timeout_seconds: 300 # 5 minutes
+
+# --- Optimization Goals ---
+aso_strategy:
+  target_keywords:
+    - "digital clock"
+    - "widgets"
+    - "clock widget"
+    - "retro clock"
+    - "led clock"
+    - "neon clock"
+    - "nightstand clock"
+  preferred_tone: "descriptive, feature-focused, friendly"

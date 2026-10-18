@@ -1,0 +1,50 @@
+{
+  "_comment": "Sanitized for public submission. Credentials resolve from environment / Secret Manager.",
+  "apps": [
+    {
+      "package_name": "com.finance.loan.emicalculator",
+      "display_name": "EMI Calculator",
+      "app_category": "finance",
+      "ga4_property_id": null,
+      "revenue_tier": "low",
+      "revenuecat_api_key": null,
+      "revenuecat_project_id": null,
+      "google_credentials_path": null,
+      "admob_account_id": null,
+      "gcs_play_console_bucket": null,
+      "google_ads_config_path": null,
+      "google_ads_customer_id": null,
+      "events_md_path": null
+    },
+    {
+      "package_name": "com.cama.app.huge80sclockPro",
+      "display_name": "Huge Digital Clock Pro",
+      "app_category": "utilities",
+      "ga4_property_id": null,
+      "revenue_tier": "low",
+      "revenuecat_api_key": null,
+      "revenuecat_project_id": null,
+      "google_credentials_path": null,
+      "admob_account_id": null,
+      "gcs_play_console_bucket": null,
+      "google_ads_config_path": null,
+      "google_ads_customer_id": null,
+      "events_md_path": null
+    },
+    {
+      "package_name": "com.cama.app.huge80sclock",
+      "display_name": "Huge Digital Clock",
+      "app_category": "utilities",
+      "ga4_property_id": null,
+      "revenue_tier": "low",
+      "revenuecat_api_key": null,
+      "revenuecat_project_id": null,
+      "google_credentials_path": null,
+      "admob_account_id": null,
+      "gcs_play_console_bucket": null,
+      "google_ads_config_path": null,
+      "google_ads_customer_id": null,
+      "events_md_path": null
+    }
+  ]
+}

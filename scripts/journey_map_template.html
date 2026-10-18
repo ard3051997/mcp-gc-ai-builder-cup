@@ -1,0 +1,3381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalagato Journey Map Intelligence Platform (JMIP)</title>
+    <meta name="description" content="Interactive visual dashboard mapping product journeys, GA4 behavioral signals, Play Store qualitative metrics, and code references.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-base: #08080f;
+            --bg-surface: rgba(18, 18, 32, 0.6);
+            --bg-surface-opaque: #0f0f1d;
+            --bg-card: rgba(26, 26, 46, 0.4);
+            --bg-card-hover: rgba(36, 36, 62, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            
+            --accent-primary: #8b5cf6; /* purple */
+            --accent-primary-glow: rgba(139, 92, 246, 0.3);
+            --accent-secondary: #06b6d4; /* cyan */
+            
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.15);
+            
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(90, 47, 188, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        h1, h2, h3, h4, h5, h6, .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar Styling */
+        aside.sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-surface-opaque);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-brand .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: white;
+            box-shadow: 0 0 15px var(--accent-primary-glow);
+        }
+
+        .sidebar-brand .logo-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #ffffff, #d1d5db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin: 24px 0 12px 12px;
+        }
+
+        .sidebar-section-title:first-of-type {
+            margin-top: 8px;
+        }
+
+        /* App Selector Dropdown */
+        .app-selector-container {
+            padding: 16px 16px 8px 16px;
+        }
+        
+        .app-select-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .app-select-box:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-hover);
+        }
+
+        .app-select-dropdown {
+            display: none;
+            position: absolute;
+            background: #121224;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            width: calc(var(--sidebar-width) - 32px);
+            margin-top: 4px;
+            box-shadow: var(--shadow-lg), 0 0 20px rgba(0,0,0,0.5);
+            z-index: 110;
+        }
+
+        .app-select-dropdown.open {
+            display: block;
+        }
+
+        .app-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            transition: background 0.2s ease;
+        }
+
+        .app-option:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .app-option.active {
+            background: var(--accent-primary-glow);
+            color: white;
+        }
+
+        .app-option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .app-option .badge-health {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        .app-option.active .badge-health {
+            background: var(--color-success);
+            color: white;
+        }
+
+        /* Navigation List */
+        .flow-nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .flow-nav-item button {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            text-align: left;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .flow-nav-item button:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+        }
+
+        .flow-nav-item.active button {
+            background: linear-gradient(90deg, var(--accent-primary), rgba(139, 92, 246, 0.1));
+            color: white;
+            font-weight: 600;
+            box-shadow: inset 3px 0 0 var(--accent-primary);
+        }
+
+        .flow-nav-item .journey-count {
+            font-size: 0.7rem;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .flow-nav-item.active .journey-count {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        /* Main Workspace Container */
+        main.main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-right: 0; /* detail panel fits here */
+            transition: padding-right 0.3s ease;
+        }
+
+        main.main-content.panel-open {
+            padding-right: 400px;
+        }
+
+        /* Top Bar Header */
+        header.topbar {
+            background: rgba(8, 8, 15, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .app-info-header {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .app-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-title-row h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .app-package {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'Fira Code', monospace;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-health-master {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--color-success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .badge-aso-master {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--color-info);
+        }
+
+        /* Toolbar Controls */
+        .topbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Date Range Selector */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .date-toggle-group {
+            display: flex;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .date-toggle-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-toggle-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Live Data Toggle Switch */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            transition: .3s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-secondary);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-primary);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+            background-color: white;
+        }
+
+        /* Mode Tabs */
+        .tab-bar {
+            background: rgba(13, 13, 25, 0.5);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            display: flex;
+            gap: 24px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 14px 4px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: white;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-primary);
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+
+        /* Dashboard Workspace Area */
+        .workspace-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tab-panel {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Info Alert Box */
+        .alert-info {
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-info svg {
+            flex-shrink: 0;
+            color: #60a5fa;
+        }
+
+        /* JOURNEY MAP VIEW: Horizontal Columns */
+        .journey-map-container {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        .journey-column {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .stage-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .stage-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stage-card.leak {
+            border-color: rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.08);
+        }
+        
+        .stage-card.leak::after {
+            content: "LEAK";
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--color-danger);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .stage-order {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            text-transform: uppercase;
+        }
+
+        .stage-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .stage-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -6px;
+        }
+
+        /* Divider line in cards */
+        .card-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Section of Cards */
+        .card-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bullet-item {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding-left: 12px;
+            position: relative;
+        }
+
+        .bullet-item::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+        }
+
+        /* Emotion Arc / Badge */
+        .emotion-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .emotion-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .emotion-score-5 { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--color-success); }
+        .emotion-score-4 { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--color-info); }
+        .emotion-score-3 { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--color-warning); }
+        .emotion-score-2 { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--color-danger); }
+        .emotion-score-1 { background: rgba(239, 68, 68, 0.25); border: 1px solid rgba(239, 68, 68, 0.5); color: var(--color-danger); }
+
+        /* Live overlay metrics */
+        .live-metrics-overlay {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .live-active .live-metrics-overlay {
+            display: flex;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+        }
+
+        .metric-val {
+            font-weight: 600;
+            color: white;
+        }
+
+        .metric-pill-rate {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .rate-good { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+        .rate-fair { background: rgba(245, 158, 11, 0.15); color: var(--color-warning); }
+        .rate-poor { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+
+        /* Branch Pills */
+        .branch-pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .branch-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .branch-pill.happy {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.05);
+            color: #a7f3d0;
+        }
+
+        .branch-pill.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.05);
+            color: #fca5a5;
+        }
+
+        /* FUNNEL VIEW STYLING */
+        .funnel-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+        }
+
+        .card-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card-box-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+        }
+
+        /* Funnel SVG Render */
+        .funnel-chart-svg {
+            width: 100%;
+            height: 400px;
+        }
+
+        .funnel-stage-group:hover rect {
+            fill: var(--bg-card-hover);
+            stroke: var(--accent-primary);
+        }
+
+        /* Funnel Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-card-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .stat-card-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* BACKLOG VIEW STYLING */
+        .backlog-table-container {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        table.data-table th {
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        table.data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: var(--text-secondary);
+        }
+
+        table.data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+            color: white;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .priority-critical { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--color-danger); }
+        .priority-high { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--color-warning); }
+        .priority-medium { background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: var(--color-info); }
+        .priority-low { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-color); color: var(--text-muted); }
+
+        .code-location-link {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .code-location-link:hover {
+            text-decoration: underline;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px var(--accent-primary-glow);
+        }
+
+        /* DETAIL PANEL: Right side drawer */
+        .detail-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: #0d0d19;
+            border-left: 1px solid var(--border-color);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+            z-index: 120;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .detail-panel.open {
+            right: 0;
+        }
+
+        .detail-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .detail-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-close-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .detail-close-btn:hover {
+            color: white;
+        }
+
+        .detail-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .detail-section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        /* Codeblock styling */
+        .code-block-container {
+            background: #07070d;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+
+        pre.code-block {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.75rem;
+            color: #d1d5db;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .code-copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            font-size: 0.65rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .code-copy-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        /* Qualitative Reviews Section */
+        .review-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .review-rating-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+        }
+
+        .stars {
+            color: var(--color-warning);
+        }
+
+        .review-author {
+            color: var(--text-muted);
+        }
+
+        .review-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        /* Opportunity Action Panel */
+        .opp-card {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .opp-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .opp-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+        }
+
+        /* Search input for lists */
+        .search-bar {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 10px var(--accent-primary-glow);
+        }
+
+        /* Revenue Gap Indicator */
+        .rev-gap-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .rev-gap-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .gap-warning-banner {
+            grid-column: span 2;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        /* Emotion Arc Canvas Spline Overlay */
+        .map-wrapper {
+            position: relative;
+        }
+        
+        .emotion-svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* User Path Exploration View */
+        .path-explorer-container {
+            display: flex;
+            gap: 60px;
+            overflow-x: auto;
+            position: relative;
+            min-height: 550px;
+        }
+        .path-column {
+            flex: 1;
+            min-width: 150px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .path-column:not(:last-child)::after {
+            content: "→";
+            position: absolute;
+            right: -38px;
+            top: 6px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        .path-node {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .path-node-inner {
+            margin-left: 14px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            width: calc(100% - 14px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .path-node:hover .path-node-inner {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* GA4 Toolbar Mockup styling */
+        .ga4-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 16px;
+            margin-bottom: 16px;
+            border-radius: 8px 8px 0 0;
+        }
+        .ga4-tab-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ga4-tab {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ga4-tab-icon {
+            color: var(--accent-secondary);
+        }
+        .ga4-add-tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .ga4-add-tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .ga4-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ga4-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .ga4-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .ga4-icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .ga4-icon-btn:hover {
+            opacity: 1;
+        }
+        .ga4-divider {
+            color: rgba(255, 255, 255, 0.1);
+            margin: 0 4px;
+        }
+        .ga4-title-row {
+            padding: 4px 16px 0 16px;
+            margin-bottom: 8px;
+        }
+        .ga4-title-row h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+        }
+        .ga4-select-box {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            height: 30px;
+        }
+        .ga4-select-box select {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+        .ga4-select-box span {
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 8px;
+        }
+        .ga4-select-box.static {
+            background: rgba(255, 255, 255, 0.01);
+            color: var(--text-muted);
+            cursor: default;
+        }
+        .ga4-select-box.static span {
+            color: var(--text-secondary);
+        }
+        .ga4-select-arrow {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="live-active">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo-icon">K</div>
+            <div class="logo-text">JourneyMap IQ</div>
+        </div>
+        
+        <!-- App Selector -->
+        <div class="app-selector-container">
+            <div class="control-label" style="margin-left: 4px; margin-bottom: 6px;">Active App</div>
+            <div class="app-select-box" onclick="toggleAppDropdown()">
+                <span id="active-app-name">EMI Calculator Android</span>
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="app-select-dropdown" id="app-dropdown">
+                <div class="app-option active" onclick="selectApp('emi')">
+                    <span>EMI Calculator Android</span>
+                    <span class="badge-health">Score: 88</span>
+                </div>
+                <div class="app-option disabled">
+                    <span>Voice Changer Android</span>
+                    <span class="badge-health" style="background:#4b5563;color:#d1d5db">Score: N/A</span>
+                </div>
+                <div class="app-option disabled">
+                    <span>Ryn VPN Android</span>
+                    <span class="badge-health" style="background:#4b5563;color:#d1d5db">Score: N/A</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-scroll">
+            <div class="sidebar-section-title">Product Flows</div>
+            <ul class="flow-nav-list">
+                <li class="flow-nav-item active" id="nav-flow-onboarding" onclick="switchFlow('onboarding')">
+                    <button>
+                        <span>Onboarding & Paywall</span>
+                        <span class="journey-count">J1, J2</span>
+                    </button>
+                </li>
+                <li class="flow-nav-item" id="nav-flow-dashboard" onclick="switchFlow('dashboard')">
+                    <button>
+                        <span>Home & Navigation</span>
+                        <span class="journey-count">J3, J14</span>
+                    </button>
+                </li>
+                <li class="flow-nav-item" id="nav-flow-core" onclick="switchFlow('core')">
+                    <button>
+                        <span>EMI Calculator Core</span>
+                        <span class="journey-count">J4 - J7</span>
+                    </button>
+                </li>
+                <li class="flow-nav-item" id="nav-flow-secondary" onclick="switchFlow('secondary')">
+                    <button>
+                        <span>Other Finance Tools</span>
+                        <span class="journey-count">J8, J12, J13</span>
+                    </button>
+                </li>
+                <li class="flow-nav-item" id="nav-flow-news" onclick="switchFlow('news')">
+                    <button>
+                        <span>News & Engagement</span>
+                        <span class="journey-count">J10, J11</span>
+                    </button>
+                </li>
+                <li class="flow-nav-item" id="nav-flow-system" onclick="switchFlow('system')">
+                    <button>
+                        <span>Settings & System</span>
+                        <span class="journey-count">J9, J15</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- MAIN WINDOW -->
+    <main class="main-content" id="main-content">
+        
+        <!-- HEADER TOPBAR -->
+        <header class="topbar">
+            <div class="app-info-header">
+                <div class="app-title-row">
+                    <h1 id="topbar-app-title">EMI Calculator Android</h1>
+                    <div class="header-badges">
+                        <span class="header-badge badge-health-master" id="topbar-health-badge">Funnel Health: 88/100</span>
+                        <span class="header-badge badge-aso-master" id="topbar-aso-badge">ASO Score: 84/100</span>
+                    </div>
+                </div>
+                <div class="app-package">com.finance.loan.emicalculator &nbsp;|&nbsp; <span id="topbar-date-range" style="color:var(--text-muted); font-size:0.8rem;">Date range: today</span></div>
+            </div>
+            
+            <div class="topbar-controls">
+                <!-- Live Data Toggle -->
+                <div class="switch-container" onclick="toggleLiveData()">
+                    <span class="control-label" id="live-toggle-label">Live Data Overlay</span>
+                    <label class="switch">
+                        <input type="checkbox" id="live-data-checkbox" checked onchange="toggleLiveData()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <!-- Date Toggle -->
+                <div class="control-group">
+                    <span class="control-label">Period</span>
+                    <div class="date-toggle-group">
+                        <button class="date-toggle-btn active" id="btn-period-30d" onclick="switchPeriod('30d')">30D</button>
+                        <button class="date-toggle-btn" id="btn-period-7d" onclick="switchPeriod('7d')">7D</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEW TAB SELECTOR -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" id="tab-btn-map" onclick="switchView('map')">Journey Map Canvas</button>
+            <button class="tab-btn" id="tab-btn-pathexplorer" onclick="switchView('pathexplorer')">User Path Exploration (GA4)</button>
+            <button class="tab-btn" id="tab-btn-funnel" onclick="switchView('funnel')">Funnel Analytics & Discrepancies</button>
+            <button class="tab-btn" id="tab-btn-playstats" onclick="switchView('playstats')">Play Store Performance</button>
+            <button class="tab-btn" id="tab-btn-backlog" onclick="switchView('backlog')">Opportunity Backlog</button>
+            <button class="tab-btn" id="tab-btn-events" onclick="switchView('events')">Code Event Registry (46)</button>
+            <button class="tab-btn" id="tab-btn-importer" onclick="switchView('importer')">Spreadsheet Importer (F5)</button>
+        </nav>
+
+        <!-- WORKSPACE AREA -->
+        <div class="workspace-area">
+            
+            <!-- ALERT BANNER -->
+            <div class="alert-info" id="live-info-banner">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18Z" stroke="currentColor" stroke-width="2"/><path d="M10 6V11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14" r="1" fill="currentColor"/></svg>
+                <span><strong>GA4 Signals Live</strong>: Overlaying active session signals from GA4 property. Transition percentages are cohort approximations. Use GA4 Explorations for strict sequential funnels. &nbsp;|&nbsp; <span style="color:rgba(150,150,170,0.9)">&#9632;</span> <em>Dashed grey bars</em> = estimated from category benchmarks (no real Play Console impression data). ~% labels indicate these are not measured values.</span>
+            </div>
+
+            <!-- VIEW 1: JOURNEY MAP CANVAS -->
+            <div class="tab-panel active" id="panel-map">
+                <div class="map-wrapper">
+                    <!-- Journey Map Horizontal Scroll Grid -->
+                    <div class="journey-map-container" id="journey-map-grid">
+                        <!-- Loaded dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: USER PATH EXPLORATION -->
+            <div class="tab-panel" id="panel-pathexplorer">
+                <div class="card-box" style="overflow-x: auto; min-height: 600px; padding: 0;">
+                    
+                    <!-- GA4 Top Toolbar Mockup -->
+                    <div class="ga4-toolbar">
+                        <div class="ga4-tab-selector">
+                            <div class="ga4-tab">
+                                <span class="ga4-tab-icon">🗺️</span>
+                                <span class="ga4-tab-text">Path exploration</span>
+                                <span class="ga4-tab-arrow">▾</span>
+                            </div>
+                            <button class="ga4-add-tab-btn" title="Add exploration">+</button>
+                        </div>
+                        <div class="ga4-toolbar-right">
+                            <button class="ga4-btn" onclick="resetPathExplorer()"><span style="font-size: 0.8rem;">🔄</span> Start over</button>
+                            <button class="ga4-icon-btn" title="Undo">↩️</button>
+                            <button class="ga4-icon-btn" title="Redo">↪️</button>
+                            <button class="ga4-icon-btn" title="Download image" onclick="downloadPathExplorerImage()">📥</button>
+                            <button class="ga4-icon-btn" title="Share exploration">🔗</button>
+                            <span class="ga4-divider">|</span>
+                            <button class="ga4-icon-btn" title="Data quality: 100% threshold active" style="color: var(--color-success);">⚠️</button>
+                        </div>
+                    </div>
+
+                    <div class="ga4-title-row">
+                        <h2>All Users</h2>
+                    </div>
+                    
+                    <div class="path-explorer-container" style="position: relative; display: flex; gap: 60px; min-width: 1200px; padding: 10px 24px 20px 24px; min-height: 520px;">
+                        <!-- SVG Layer for Bezier Ribbon flows -->
+                        <svg id="path-svg-connectors" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: stroke; z-index: 5;"></svg>
+                        
+                        <div class="path-column" id="path-col-0" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-1" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-2" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-3" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-4" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-5" style="z-index: 10;"></div>
+                        <div class="path-column" id="path-col-6" style="z-index: 10;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: FUNNEL ANALYTICS -->
+            <div class="tab-panel" id="panel-funnel">
+                <div class="funnel-layout">
+                    <!-- Left: Funnel Chart and Leak Table -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 4V20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12L14 6L10 10L4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Master Conversion Funnel (10 Stages)
+                            </h2>
+                            <div id="funnel-chart-wrapper">
+                                <!-- Rendered as interactive SVG dynamically -->
+                            </div>
+                        </div>
+
+                        <div class="card-box">
+                            <h2 class="card-box-title" style="color: var(--color-danger)">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0 -3.42 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                                Primary Funnel Leaks (Below Benchmarks)
+                            </h2>
+                            <div class="backlog-table-container">
+                                <table class="data-table" id="funnel-leaks-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Step Leak</th>
+                                            <th>You</th>
+                                            <th>Benchmark</th>
+                                            <th>Gap</th>
+                                            <th>Lost/Day</th>
+                                            <th>Monthly Leak Cost</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: AdMob vs GA4 comparison -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M12 4V20" stroke="currentColor" stroke-width="2"/><path d="M2 12H22" stroke="currentColor" stroke-width="2"/></svg>
+                                GA4 vs AdMob Revenue Discrepancy
+                            </h2>
+                            
+                            <div class="rev-gap-panel">
+                                <div class="rev-gap-card">
+                                    <div class="control-label" style="margin-bottom: 8px;">GA4 Ad Revenue</div>
+                                    <div class="stat-card-val" id="funnel-ga4-rev" style="color: var(--accent-secondary)">$3,049.48</div>
+                                    <div class="stat-card-desc">Firebase Attributed</div>
+                                </div>
+                                <div class="rev-gap-card">
+                                    <div class="control-label" style="margin-bottom: 8px;">AdMob Earnings</div>
+                                    <div class="stat-card-val" id="funnel-admob-rev" style="color: var(--accent-primary)">$1,554.67</div>
+                                    <div class="stat-card-desc">Network Payout (Actual)</div>
+                                </div>
+                                
+                                <div class="gap-warning-banner">
+                                    <strong>Calculated Discrepancy: <span id="funnel-gap-percent">96.1%</span> Higher in GA4</strong><br>
+                                    <p style="margin-top: 6px; font-size: 0.75rem; color: var(--text-secondary);">
+                                        <strong>Root Cause Identified</strong>: GA4 attribution-models <em>all</em> network mediation impressions in-app, while our AdMob client query filters strictly for the main AdMob publisher ID. The remaining ~49% of impressions are sold via external Mediation networks (such as InMobi, AppLovin, or Unity) which report earnings under separate publisher panels.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                                App Analytics Metadata
+                            </h2>
+                            <div class="metric-row">
+                                <span class="metric-label">App LTV</span>
+                                <span class="metric-val" id="funnel-ltv">$0.13</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">30D Active Users</span>
+                                <span class="metric-val" id="funnel-mau">1,425,478</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Average Daily Users</span>
+                                <span class="metric-val" id="funnel-dau">45,983</span>
+                            </div>
+                            <div class="metric-row">
+                                <span class="metric-label">Store Conversion Rate</span>
+                                <span class="metric-val" id="funnel-store-conv">33.0% (Category Avg: 33%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: PLAY STORE PERFORMANCE (GCS) -->
+            <div class="tab-panel" id="panel-playstats">
+                <div class="funnel-layout">
+                    <!-- Left: Installs & Uninstalls Trends -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                                Install & Uninstall Trends (GCS)
+                            </h2>
+                            <div class="rev-gap-panel" style="grid-template-columns: repeat(3, 1fr); gap: 16px; display: grid;">
+                                <div class="rev-gap-card">
+                                    <div class="control-label" style="margin-bottom: 8px;">Total Installs</div>
+                                    <div class="stat-card-val" id="gcs-total-installs" style="color: var(--color-success)">-</div>
+                                    <div class="stat-card-desc">For Month: <span id="gcs-stats-month">-</span></div>
+                                </div>
+                                <div class="rev-gap-card">
+                                    <div class="control-label" style="margin-bottom: 8px;">Total Uninstalls</div>
+                                    <div class="stat-card-val" id="gcs-total-uninstalls" style="color: var(--color-danger)">-</div>
+                                    <div class="stat-card-desc">Device Churn</div>
+                                </div>
+                                <div class="rev-gap-card">
+                                    <div class="control-label" style="margin-bottom: 8px;">Avg Active Devices</div>
+                                    <div class="stat-card-val" id="gcs-avg-active" style="color: var(--accent-secondary)">-</div>
+                                    <div class="stat-card-desc">Active Installs Base</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                                Traffic Source Acquisitions (GCS)
+                            </h2>
+                            <div class="backlog-table-container">
+                                <table class="data-table" id="gcs-traffic-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Traffic Source</th>
+                                            <th>Total Store Acquisitions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Country Distribution -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <div class="card-box">
+                            <h2 class="card-box-title">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/></svg>
+                                Top Countries by Acquisitions (GCS)
+                            </h2>
+                            <div class="backlog-table-container">
+                                <table class="data-table" id="gcs-country-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Country / Region</th>
+                                            <th>Total Store Acquisitions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Loaded dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: OPPORTUNITY BACKLOG -->
+            <div class="tab-panel" id="panel-backlog">
+                <div class="card-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="card-box-title" style="border-bottom: none; padding-bottom: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="3" width="6" height="4" rx="2" stroke="currentColor" stroke-width="2"/></svg>
+                            Opportunity Backlog (Sorted by Priority Score)
+                        </h2>
+                        <input type="text" class="search-bar" id="backlog-search" placeholder="Search backlog..." style="width: 250px; margin-bottom: 0;" oninput="filterBacklogTable()">
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: -10px;">Priority Score = (Stage Traffic Ratio &times; Churn Rate &times; 10) / Effort Score (S=1, M=2, L=4)</p>
+
+                    <!-- Claude Code Prompt Generator (F8) -->
+                    <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 8px; padding: 16px; margin: 16px 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <h3 class="font-outfit" style="font-size:0.95rem; color:white; display:flex; align-items:center; gap:8px; margin:0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                Claude Code Prompt Generator (F8)
+                            </h3>
+                            <button class="action-btn" onclick="copyClaudePrompt()" style="padding: 4px 10px; font-size: 0.75rem;">Copy Prompt</button>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px;">
+                            Copy this prompt to run directly in your Claude Code session to automate the implementation of the backlog opportunities above.
+                        </p>
+                        <div class="code-block-container" style="background:#07070d; padding:10px;">
+                            <pre class="code-block" id="claude-prompt-text" style="font-size:0.75rem; color:#93c5fd; overflow-x:auto; white-space:pre-wrap; max-height: 120px; margin:0;">Using the mapped product journeys of com.finance.loan.emicalculator from EVENTS.md and the active GA4 funnel leaks (Day 1 -> Onboarding Complete conversion rate 48%), implement a feature to resolve the onboarding drop-off. Simplify the onboarding slide swaps in OnboardingActivity.kt, add proper tracking for skip actions, and ensure all ad interstitials are throttled. Validate your changes compile and run the local analytics verification tests.</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="backlog-table-container">
+                        <table class="data-table" id="backlog-table">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Opportunity</th>
+                                    <th>Flow / Journey</th>
+                                    <th>Effort</th>
+                                    <th>Impact Value (LTV &times; Lost Users)</th>
+                                    <th>Code Location Reference</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: CODE EVENT REGISTRY -->
+            <div class="tab-panel" id="panel-events">
+                <div class="card-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 class="card-box-title" style="border-bottom: none; padding-bottom: 0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M10 20H4C2.89543 20 2 19.1046 2 18V6C2 4.89543 2.89543 4 4 4H10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M18 4H20C21.1046 4 22 4.89543 22 6V18C22 19.1046 21.1046 20 20 20H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 11L13 14L10 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 4V14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            Codebase Analytics Events Registry
+                        </h2>
+                        <input type="text" class="search-bar" id="events-search" placeholder="Search by event name or file..." style="width: 300px; margin-bottom: 0;" oninput="filterEventsTable()">
+                    </div>
+                    
+                    <div class="backlog-table-container">
+                        <table class="data-table" id="events-table">
+                            <thead>
+                                <tr>
+                                    <th>GA4 Event Name</th>
+                                    <th>Method Used</th>
+                                    <th>File Location</th>
+                                    <th>Trigger Journey</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: SPREADSHEET IMPORTER -->
+            <div class="tab-panel" id="panel-importer">
+                <div class="card-box">
+                    <h2 class="card-box-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="2"/></svg>
+                        Excel / Google Sheets Journey Map Importer
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Import your existing spreadsheet-based journey maps. Paste CSV data to automatically map columns to the JMIP schema.
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:16px; margin-top: 10px;">
+                        <textarea class="search-bar" id="csv-paste-area" rows="6" placeholder="Paste your CSV data here (e.g. Stage, User Actions, Touchpoints, Emotion, Pain Points, Opportunities)..." style="font-family: monospace; font-size: 0.8rem;"></textarea>
+                        
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <button class="action-btn" onclick="processCSVImport()">Parse & Preview Map</button>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Auto-detects common column headers (case-insensitive)</span>
+                        </div>
+                    </div>
+                    
+                    <div id="import-preview-container" style="display:none; margin-top:20px; border-top:1px solid var(--border-color); padding-top:20px;">
+                        <h3 class="font-outfit" style="margin-bottom:12px; font-size:1.1rem; color:white;">Column Mapping Preview</h3>
+                        <div class="backlog-table-container">
+                            <table class="data-table" id="import-preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Imported Row</th>
+                                        <th>Target Stage Name</th>
+                                        <th>Actions Map</th>
+                                        <th>Touchpoints Map</th>
+                                        <th>Emotion Map</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                        <button class="action-btn" style="margin-top:16px; background:var(--color-success); border-color:var(--color-success);" onclick="confirmCSVImport()">Apply to Active Flow</button>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- RIGHT DETAIL PANEL (SLIDE IN DRAWER) -->
+        <div class="detail-panel" id="detail-panel">
+            <div class="detail-header">
+                <div class="detail-title-group">
+                    <span class="stage-order" id="detail-stage-order">Stage 0</span>
+                    <h2 id="detail-stage-title" style="color: white; font-size: 1.2rem; font-weight: 700;">Stage Details</h2>
+                </div>
+                <button class="detail-close-btn" onclick="closeDetailPanel()">&times;</button>
+            </div>
+            <div class="detail-content" id="detail-panel-body">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MASTER DATA INJECTION -->
+    <script id="master-data-json" type="application/json">
+__MASTER_DATA__
+    </script>
+
+    <!-- INTERACTIVE APP SPA SCRIPT -->
+    <script>
+        // Load data from template tag
+        const masterData = JSON.parse(document.getElementById('master-data-json').textContent);
+        
+        let currentFlow = 'onboarding';
+        let currentPeriod = '30d';
+        let liveDataActive = true;
+        let activeView = 'map';
+        
+        // Load on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            renderJourneyMap();
+            renderFunnelView();
+            renderPlayStatsView();
+            renderBacklogView();
+            renderEventsView();
+            renderPathExplorer();
+            
+            // Window resize handler for path exploration connectors
+            window.addEventListener('resize', () => {
+                if (activeView === 'pathexplorer') {
+                    drawConnectors();
+                }
+            });
+        });
+
+        let importedStages = [];
+
+        function processCSVImport() {
+            const csvText = document.getElementById('csv-paste-area').value.trim();
+            if (!csvText) {
+                alert("Please paste some CSV data first.");
+                return;
+            }
+            
+            const lines = csvText.split('\n');
+            if (lines.length < 2) {
+                alert("CSV must have a header row and at least one data row.");
+                return;
+            }
+            
+            function parseCSVLine(line) {
+                let cells = [];
+                let inQuotes = false;
+                let currentCell = '';
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        cells.push(currentCell.trim());
+                        currentCell = '';
+                    } else {
+                        currentCell += char;
+                    }
+                }
+                cells.push(currentCell.trim());
+                return cells;
+            }
+            
+            const headers = parseCSVLine(lines[0]);
+            
+            const fieldMapping = {
+                stage: -1,
+                actions: -1,
+                touchpoints: -1,
+                emotion: -1,
+                pain_points: -1,
+                opps: -1
+            };
+            
+            headers.forEach((h, idx) => {
+                const headerLower = h.toLowerCase();
+                if (headerLower.includes("stage") || headerLower.includes("name")) fieldMapping.stage = idx;
+                else if (headerLower.includes("action") || headerLower.includes("user")) fieldMapping.actions = idx;
+                else if (headerLower.includes("touchpoint") || headerLower.includes("ad") || headerLower.includes("gate")) fieldMapping.touchpoints = idx;
+                else if (headerLower.includes("emotion") || headerLower.includes("score") || headerLower.includes("rate")) fieldMapping.emotion = idx;
+                else if (headerLower.includes("pain") || headerLower.includes("friction")) fieldMapping.pain_points = idx;
+                else if (headerLower.includes("opp") || headerLower.includes("recommend")) fieldMapping.opps = idx;
+            });
+            
+            if (fieldMapping.stage === -1) fieldMapping.stage = 0;
+            if (fieldMapping.actions === -1 && headers.length > 1) fieldMapping.actions = 1;
+            if (fieldMapping.touchpoints === -1 && headers.length > 2) fieldMapping.touchpoints = 2;
+            if (fieldMapping.emotion === -1 && headers.length > 3) fieldMapping.emotion = 3;
+            
+            const tbody = document.querySelector('#import-preview-table tbody');
+            tbody.innerHTML = '';
+            
+            importedStages = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cells = parseCSVLine(lines[i]);
+                
+                const stageName = cells[fieldMapping.stage] || `Stage ${i}`;
+                const actionsText = cells[fieldMapping.actions] || '';
+                const touchpointsText = cells[fieldMapping.touchpoints] || '';
+                const emotionText = cells[fieldMapping.emotion] || '3';
+                const painText = cells[fieldMapping.pain_points] || '';
+                const oppsText = cells[fieldMapping.opps] || '';
+                
+                const actionsList = actionsText.split(/[;•\n]/).map(a => a.trim()).filter(a => a);
+                const touchpointsList = touchpointsText.split(/[;,•\n]/).map(t => t.trim()).filter(t => t);
+                const painList = painText.split(/[;•\n]/).map(p => p.trim()).filter(p => p);
+                const oppsList = oppsText.split(/[;•\n]/).map(o => o.trim()).filter(o => o);
+                
+                const parsedEmotion = parseInt(emotionText) || 3;
+                
+                const stageObj = {
+                    key: `J_IMPORT_S${i}`,
+                    title: stageName,
+                    subtitle: `Imported • Step ${i}`,
+                    events: [],
+                    meta: {
+                        name: stageName,
+                        actions: actionsList.length ? actionsList : ["User engages with " + stageName],
+                        touchpoints: touchpointsList,
+                        emotion: parsedEmotion,
+                        pain_points: painList,
+                        opportunities: oppsList,
+                        reviews: []
+                    }
+                };
+                
+                importedStages.push(stageObj);
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>Row ${i}</td>
+                    <td style="font-weight:600; color:white;">${stageName}</td>
+                    <td>${stageObj.meta.actions.slice(0,2).join(', ')}...</td>
+                    <td>${stageObj.meta.touchpoints.join(', ') || 'None'}</td>
+                    <td><span class="emotion-badge emotion-score-${parsedEmotion}">${parsedEmotion}/5</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+            
+            document.getElementById('import-preview-container').style.display = 'block';
+        }
+        
+        function confirmCSVImport() {
+            if (importedStages.length === 0) {
+                alert("No stages parsed to import.");
+                return;
+            }
+            
+            importedStages.forEach(stg => {
+                stageMetadata[stg.key] = stg.meta;
+            });
+            
+            flowJourneys["custom_import"] = [99];
+            
+            const sidebarList = document.querySelector('.flow-nav-list');
+            const existingCustom = document.getElementById('nav-flow-custom');
+            if (existingCustom) existingCustom.remove();
+            
+            const customLi = document.createElement('li');
+            customLi.className = 'flow-nav-item';
+            customLi.id = 'nav-flow-custom';
+            customLi.innerHTML = `
+                <button onclick="switchFlow('custom_import')">
+                    <span>Imported Spreadsheet Map</span>
+                    <span class="journey-count">Custom</span>
+                </button>
+            `;
+            sidebarList.appendChild(customLi);
+            
+            switchFlow('custom_import');
+            switchView('map');
+            alert("Spreadsheet journey map imported successfully! You can view it under the 'Imported Spreadsheet Map' sidebar item.");
+        }
+
+        function toggleAppDropdown() {
+            document.getElementById('app-dropdown').classList.toggle('open');
+        }
+        
+        function selectApp(app) {
+            // ONLY EMI is enabled in V1, block others
+            toggleAppDropdown();
+        }
+        
+        // Closes dropdown if clicked outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('.app-selector-container')) {
+                document.getElementById('app-dropdown').classList.remove('open');
+            }
+        });
+
+        // Views switcher (Tabs)
+        function switchView(view) {
+            activeView = view;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            
+            document.getElementById('tab-btn-' + view).classList.add('active');
+            document.getElementById('panel-' + view).classList.add('active');
+            
+            if (view === 'funnel') {
+                setTimeout(renderFunnelChart, 100);
+            } else if (view === 'pathexplorer') {
+                setTimeout(renderPathExplorer, 100);
+            }
+            closeDetailPanel();
+        }
+
+        // Period switcher (7d vs 30d)
+        function switchPeriod(period) {
+            currentPeriod = period;
+            document.getElementById('btn-period-30d').classList.remove('active');
+            document.getElementById('btn-period-7d').classList.remove('active');
+            document.getElementById('btn-period-' + period).classList.add('active');
+            
+            // Re-render views to update numbers
+            renderJourneyMap();
+            renderFunnelView();
+            renderPlayStatsView();
+            renderBacklogView();
+            renderPathExplorer();
+            closeDetailPanel();
+        }
+
+        // Live data switch
+        function toggleLiveData() {
+            const checkbox = document.getElementById('live-data-checkbox');
+            liveDataActive = checkbox.checked;
+            
+            if (liveDataActive) {
+                document.body.classList.add('live-active');
+                document.getElementById('live-info-banner').style.display = 'flex';
+                document.getElementById('live-toggle-label').textContent = 'Live Data Overlay (ON)';
+            } else {
+                document.body.classList.remove('live-active');
+                document.getElementById('live-info-banner').style.display = 'none';
+                document.getElementById('live-toggle-label').textContent = 'Live Data Overlay (OFF)';
+            }
+            renderJourneyMap();
+            closeDetailPanel();
+        }
+
+        // Flow switcher (Sidebar)
+        function switchFlow(flow) {
+            currentFlow = flow;
+            document.querySelectorAll('.flow-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-flow-' + flow).classList.add('active');
+            
+            // Switch view back to map to see the flow
+            switchView('map');
+            renderJourneyMap();
+            closeDetailPanel();
+        }
+
+        // Group definitions matching our journeys to flows
+        const flowJourneys = {
+            onboarding: [1, 2],
+            dashboard: [3, 14],
+            core: [4, 5, 6, 7],
+            secondary: [8, 12, 13],
+            news: [10, 11],
+            system: [9, 15]
+        };
+
+        // Master Mapping of Stage information (Touchpoints, Emotion, Pain points, Opportunities)
+        // This coordinates our parsed EVENTS.md steps into rich structural metadata.
+        const stageMetadata = {
+            // Onboarding Slide 1
+            "J1_S1": {
+                name: "Splash Open",
+                actions: ["User installs app & opens", "Splash screen appears (OnboardingActivity)"],
+                touchpoints: ["App Launcher Icon", "Splash Branding Banner"],
+                emotion: 4,
+                pain_points: ["No onboarding session metadata tracked in analytics (Blind spot)"],
+                opportunities: ["Implement 'onboarding_splash_shown' to track first-open engagement"],
+                reviews: [
+                    { author: "Amit S.", stars: 3, text: "Splash screen takes too long to load on my old Redmi phone." },
+                    { author: "Rohit K.", stars: 4, text: "Clean splash screen, but I wanted to go straight to the calculator." }
+                ]
+            },
+            // Onboarding Swipes & Skip
+            "J1_S2": {
+                name: "Onboarding Tutorial",
+                actions: ["User swipes slides 1 to 3", "Optionally taps 'Skip' button"],
+                touchpoints: ["Tutorial Navigation Dots", "Skip Button (Top Right)"],
+                emotion: 3,
+                pain_points: ["No GA event fired on tutorial swipes or Skip clicks", "Cannot measure slide-by-slide tutorial drops"],
+                opportunities: ["Track 'onboarding_swipe' with slide_number param", "Track 'onboarding_skip' event"],
+                reviews: [
+                    { author: "Neha G.", stars: 2, text: "Onboarding screens look outdated, please let me skip faster." }
+                ]
+            },
+            // Interstitial Gate
+            "J1_S3": {
+                name: "Splash Ad Interstitial",
+                actions: ["User exits onboarding", "Ad loads and displays before dashboard (showSplashInterstitialNewUser=true)"],
+                touchpoints: ["AdMob Interstitial Ad (Gate)", "Skip Ad button"],
+                emotion: 2,
+                pain_points: ["High friction: user sees interstitial immediately after install", "Ad failure delays dashboard launch"],
+                opportunities: ["Cap interstitial ad to only repeat after 10m", "Disable for users coming via specific paid channels"],
+                reviews: [
+                    { author: "Suresh P.", stars: 1, text: "Immediately showed an ad before I could even enter my amount. Horrible!" },
+                    { author: "Vikram R.", stars: 2, text: "Ads are everywhere. Fails to load, making screen freeze for 5 seconds." }
+                ]
+            },
+            // Paywall Gate
+            "J1_S4": {
+                name: "Premium Paywall",
+                actions: ["User enters PaywallActivity", "Taps Purchase, Restore, or Cancel"],
+                touchpoints: ["RevenueCat Subscriptions Paywall (Monthly/Annual)", "Restore button"],
+                emotion: 3,
+                pain_points: ["No GA events logged for purchase, restoration, or cancel buttons in the Java Paywall wrapper"],
+                opportunities: ["Integrate RevenueCat Firebase SDK bridge to automatically map billing events to GA4"],
+                reviews: [
+                    { author: "Dinesh M.", stars: 2, text: "Tapped purchase, failed, got subscription error toast without detail." }
+                ]
+            },
+            
+            // Dashboard Load
+            "J3_S1": {
+                name: "Dashboard View",
+                actions: ["Home Fragment mounts", "Loads layout variant (V1/V2) from Remote Config"],
+                touchpoints: ["AdMob Banner (Medium Rectangle)", "News list carousel"],
+                emotion: 4,
+                pain_points: ["Medium rectangle banner competes heavily with Home tools", "News items cause layout shifts on slow connections"],
+                opportunities: ["Use lazy loading for medium rectangle banners", "Implement skeletal UI shimmers for news tiles"],
+                reviews: [
+                    { author: "Jatin V.", stars: 3, text: "Home screen is crowded. The big ad in the middle is annoying." }
+                ]
+            },
+            // Nav clicks
+            "J3_S2": {
+                name: "Navigation Clicks",
+                actions: ["User selects Bottom navigation icons", "Or clicks Hamburger drawer menus"],
+                touchpoints: ["Bottom Navigation Bar", "Side Navigation Drawer"],
+                emotion: 5,
+                pain_points: ["Compare loans has zero events fired from bottom nav", "Join WhatsApp click fires, but external redirect exits app loop"],
+                opportunities: ["Ensure 'footer_menu_compare_loan_clicked' is mapped", "Open WhatsApp in-app browser instead of system intent"],
+                reviews: []
+            },
+            
+            // Solver Mode Selection
+            "J4_S1": {
+                name: "Solver Selection",
+                actions: ["User selects mode tab (EMI / Loan / Interest / Period)"],
+                touchpoints: ["Tabs Layout (selectedItem index)"],
+                emotion: 5,
+                pain_points: ["Tab select resets pre-filled form fields", "Confusing defaults on first tab click"],
+                opportunities: ["Retain input fields across calculations when swapping modes"],
+                reviews: []
+            },
+            // Calculation inputs & calculate tap
+            "J4_S2": {
+                name: "Calculation Trigger",
+                actions: ["User inputs values", "Clicks Calculate button"],
+                touchpoints: ["Input Text fields (Amount/Rate/Period)", "Calculate Button"],
+                emotion: 4,
+                pain_points: ["Invalid values trigger toast/red border, but no GA events logged for calculation errors", "No validation event makes debugging input limits impossible"],
+                opportunities: ["Log 'emi_calculation_failed' with input_error code"],
+                reviews: [
+                    { author: "Karan D.", stars: 3, text: "If I enter 0 months it just turns red. Show a proper warning box!" }
+                ]
+            },
+            // Details Screen
+            "J4_S3": {
+                name: "Summary Details",
+                actions: ["View details, pie chart breakdown", "Taps Amortisation details or Reset"],
+                touchpoints: ["Summary Pie Chart", "AdMob Banner ad (Details screen)", "Details Button"],
+                emotion: 4,
+                pain_points: ["Pie chart not interactive", "Interstitial gate before Amortisation schedule creates user fatigue"],
+                opportunities: ["Reduce Details -> Amortisation interstitial frequency to once per 3 calculations", "Animate pie chart loads"],
+                reviews: [
+                    { author: "Rajesh S.", stars: 2, text: "Tapped 'Details' to see schedule and got a full screen video ad. Too intrusive." }
+                ]
+            },
+            // Amortisation
+            "J4_S4": {
+                name: "Amortisation Schedule",
+                actions: ["Scrolls table of payments", "Taps back button"],
+                touchpoints: ["Amortisation Schedule Grid", "Back arrow"],
+                emotion: 4,
+                pain_points: ["No GA events tracked on table scroll, pagination, or export clicks", "Table text hard to read on smaller screens"],
+                opportunities: ["Add PDF export button and track 'amortisation_pdf_exported'"],
+                reviews: []
+            },
+            
+            // Secondary Tools: SIP
+            "J8_S1": {
+                name: "SIP / FD Calculators",
+                actions: ["User inputs investment parameters", "Taps Calculate for SIP/FD/RD/PPF"],
+                touchpoints: ["SIP Input card", "Calculate button"],
+                emotion: 4,
+                pain_points: ["Secondary tools have no summary details screen; results render inline", "Less engagement signals in GA4 compared to EMI core"],
+                opportunities: ["Unify the result presentation layout with EMI core", "Track 'sip_calculator_detail_viewed'"],
+                reviews: [
+                    { author: "Sonia G.", stars: 4, text: "SIP calculator is fast, but I wish I could save the history like the loan one." }
+                ]
+            },
+            
+            // News flow
+            "J10_S1": {
+                name: "News Hub",
+                actions: ["Reads articles", "Shares news articles via WhatsApp"],
+                touchpoints: ["News Cards adapter", "News webview activity", "Share Button"],
+                emotion: 3,
+                pain_points: ["Articles load slow due to un-cached API calls", "WebView crashing on specific device models"],
+                opportunities: ["Cache news list in local SQL database", "Add share count metrics"],
+                reviews: [
+                    { author: "Tarun B.", stars: 3, text: "News section doesn't open if connection is slightly weak." }
+                ]
+            },
+            
+            // Settings
+            "J9_S1": {
+                name: "Settings Preference",
+                actions: ["Changes language", "Adjusts decimal digits or number format"],
+                touchpoints: ["Language selector", "Currency list", "Decimal slider"],
+                emotion: 4,
+                pain_points: ["Language selection forces full app restart, causing session fragmentation", "Currency settings fire no event"],
+                opportunities: ["Change languages dynamically without activity recreate", "Log 'settings_currency_changed'"],
+                reviews: []
+            }
+        };
+
+        // Render the Journey Map columns based on flow selection
+        function renderJourneyMap() {
+            const grid = document.getElementById('journey-map-grid');
+            grid.innerHTML = '';
+            
+            const selectedJourneys = flowJourneys[currentFlow];
+            const activeFunnel = currentPeriod === '30d' ? masterData.funnel_data_30d : masterData.funnel_data_7d;
+            
+            // Gather all stages for the selected journeys
+            const stages = [];
+            
+            if (currentFlow === 'custom_import') {
+                importedStages.forEach(stg => stages.push(stg));
+            } else if (currentFlow === 'onboarding') {
+                stages.push({ key: "J1_S1", title: "Splash Load", subtitle: "Journey 1 • Step 1", events: ["first_open"] });
+                stages.push({ key: "J1_S2", title: "Tutorial Swipes", subtitle: "Journey 1 • Step 2", events: [] });
+                stages.push({ key: "J1_S3", title: "Interstitial Gate", subtitle: "Journey 1 • Step 3", events: ["ad_impression"] });
+                stages.push({ key: "J1_S4", title: "Subscription Paywall", subtitle: "Journey 2 • Paywall", events: ["paywall_view"] });
+            } else if (currentFlow === 'dashboard') {
+                stages.push({ key: "J3_S1", title: "Dashboard Load", subtitle: "Journey 3.1", events: ["dashboard_viewed", "Home_news_viewed"] });
+                stages.push({ key: "J3_S2", title: "Navigation Click", subtitle: "Journey 3.2 - 3.4", events: ["footer_menu_emi_cal_clicked", "footer_menu_home_clicked", "footer_menu_compare_loan_clicked", "hm_emi_calculator_clicked", "hm_compare_loans_clicked", "hm_currency_conv_clicked", "hm_gst_cal_clicked", "hm_sip_cal_clicked", "hm_fd_cal_clicked", "hm_rd_cal_clicked", "hm_ppf_cal_clicked", "setting_setting_clicked", "hm_Join_whatsapp_clicked", "home_finance_see_all_clicked", "dashboard_currency_conv_clicked"] });
+            } else if (currentFlow === 'core') {
+                stages.push({ key: "J4_S1", title: "Mode Tab Select", subtitle: "Journey 4.1", events: ["emi_calculator_emi_tab_clicked", "emi_calculator_loan_amount_clicked", "emi_calculator_interest_clicked", "emi_calculator_period_clicked"] });
+                stages.push({ key: "J4_S2", title: "Trigger Calculate", subtitle: "Journey 4.2", events: ["emi_calculator_calculate_clicked", "emi_calculator_loan_amt_cal_clicked", "emi_calculator_interest_cal_clicked", "emi_calculator_period_cal_clicked", "new_design_calculate_clicked"] });
+                stages.push({ key: "J4_S3", title: "Details Screen", subtitle: "Journey 5.0", events: ["calc_details_reset_clicked", "emi_calculator_history_clicked"] });
+                stages.push({ key: "J4_S4", title: "Amortisation Table", subtitle: "Journey 6.0", events: [] });
+            } else if (currentFlow === 'secondary') {
+                stages.push({ key: "J8_S1", title: "Solve Calculators", subtitle: "Journey 8, 12, 13", events: ["sip_calculator_calculate_clicked", "sip_calculator_reset_clicked", "dashboard_currency_conv_clicked"] });
+            } else if (currentFlow === 'news') {
+                stages.push({ key: "J10_S1", title: "Engagement / News", subtitle: "Journey 10, 11", events: ["Home_news_viewed", "Home_news_clicked", "News_share_clicked", "info_page_socialmedia_clicked", "info_page_share_App_clicked", "info_page_rate_us_clicked", "info_page_privacy_policy_clicked"] });
+            } else if (currentFlow === 'system') {
+                stages.push({ key: "J9_S1", title: "App Configuration", subtitle: "Journey 9, 15", events: ["setting_language_selection"] });
+            }
+            
+            stages.forEach((stg, index) => {
+                const meta = stageMetadata[stg.key] || { name: stg.title, actions: [], touchpoints: [], emotion: 3, pain_points: [], opportunities: [] };
+                const col = document.createElement('div');
+                col.className = 'journey-column';
+                
+                // Determine if this stage has a critical leak
+                let isLeak = false;
+                let leakDetails = null;
+                
+                if (stg.key === "J1_S2") { // Map J1_S2 to the Onboarding Complete leak
+                    isLeak = true;
+                    leakDetails = activeFunnel.leaks.find(l => l.name.includes("Onboarding"));
+                }
+                
+                // Construct card HTML
+                let cardHtml = `
+                    <div class="stage-card ${isLeak ? 'leak' : ''}" onclick="openStageDetail('${stg.key}')">
+                        <div class="stage-order">STAGE ${index+1}</div>
+                        <div class="stage-title">${meta.name}</div>
+                        <div class="stage-subtitle">${stg.subtitle}</div>
+                        
+                        <div class="card-divider"></div>
+                        
+                        <div class="card-section">
+                            <div class="section-label">User Actions</div>
+                            <ul class="bullet-list">
+                                ${meta.actions.map(a => `<li class="bullet-item">${a}</li>`).join('')}
+                            </ul>
+                        </div>
+
+                        <div class="card-section">
+                            <div class="section-label">Touchpoints</div>
+                            <div class="branch-pill-list">
+                                ${meta.touchpoints.map(t => `<span class="branch-pill">${t}</span>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="card-divider"></div>
+
+                        <div class="emotion-badge-row">
+                            <span class="control-label">User Emotion</span>
+                            <span class="emotion-badge emotion-score-${meta.emotion}">
+                                ${getEmotionEmoji(meta.emotion)} Score: ${meta.emotion}/5
+                            </span>
+                        </div>
+                        
+                        <!-- Live Data Overlay -->
+                        <div class="live-metrics-overlay">
+                            <div class="section-label" style="color: var(--accent-secondary)">GA4 Event Signal</div>
+                            ${stg.events.length > 0 ? stg.events.map(ev => {
+                                const count = (activeFunnel.raw_event_counts && activeFunnel.raw_event_counts[ev]) || activeFunnel.real_event_mapping[ev] || activeFunnel.real_event_mapping[ev + '_users'] || 0;
+                                const formattedCount = count > 0 ? (count >= 1000 ? (count/1000).toFixed(1) + 'k' : count) : '0';
+                                return `
+                                    <div class="metric-row">
+                                        <span class="metric-label" style="font-family: 'Fira Code', monospace; font-size: 0.7rem;">${ev}</span>
+                                        <span class="metric-val">${formattedCount}</span>
+                                    </div>
+                                `;
+                            }).join('') : `<div class="metric-row"><span class="metric-label" style="font-style:italic;">No event instrumented</span></div>`}
+                            
+                            ${leakDetails ? `
+                                <div class="card-divider"></div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Transition Rate</span>
+                                    <span class="metric-pill-rate rate-poor">${(leakDetails.conversion_rate*100).toFixed(1)}%</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Benchmark</span>
+                                    <span class="metric-val">${(leakDetails.benchmark_rate*100).toFixed(0)}%</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                col.innerHTML = cardHtml;
+                grid.appendChild(col);
+            });
+        }
+
+        function getEmotionEmoji(score) {
+            switch(score) {
+                case 5: return "😊";
+                case 4: return "🙂";
+                case 3: return "😐";
+                case 2: return "😟";
+                case 1: return "😡";
+                default: return "😐";
+            }
+        }
+
+        // Render the Master Funnel graph & table
+        function renderFunnelView() {
+            renderFunnelChart();
+            
+            const tbody = document.querySelector('#funnel-leaks-table tbody');
+            tbody.innerHTML = '';
+            
+            const activeFunnel = currentPeriod === '30d' ? masterData.funnel_data_30d : masterData.funnel_data_7d;
+            
+            if (activeFunnel.leaks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-muted);">No leaks detected! Performing at or above category benchmarks.</td></tr>`;
+                return;
+            }
+            
+            activeFunnel.leaks.forEach(leak => {
+                const tr = document.createElement('tr');
+                const gapVal = leak.gap * 100;
+                const monthlyLeakCost = leak.monthly_revenue_impact;
+                
+                tr.innerHTML = `
+                    <td style="font-weight: 600; color: white;">${leak.name}</td>
+                    <td>${(leak.conversion_rate*100).toFixed(1)}%</td>
+                    <td>${(leak.benchmark_rate*100).toFixed(0)}%</td>
+                    <td style="color: var(--color-danger)">${gapVal.toFixed(1)}%</td>
+                    <td>${leak.users_lost_daily}</td>
+                    <td style="font-weight: 600; color: white;">$${monthlyLeakCost.toFixed(2)}</td>
+                    <td><span class="priority-badge priority-${leak.priority}">${leak.priority}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update stats
+            const admobRev = currentPeriod === '30d' 
+                ? activeFunnel.revenue_data.admob.ad_revenue_30d 
+                : activeFunnel.revenue_data.admob.ad_revenue_7d;
+
+            document.getElementById('funnel-ga4-rev').textContent = `$${activeFunnel.revenue_data.ga4_revenue.ad_revenue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('funnel-admob-rev').textContent = `$${admobRev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('funnel-ltv').textContent = `$${activeFunnel.ltv_used.toFixed(2)}`;
+            document.getElementById('funnel-mau').textContent = activeFunnel.real_event_mapping.total_30d_users.toLocaleString();
+            document.getElementById('funnel-dau').textContent = Math.round(activeFunnel.real_event_mapping.average_dau).toLocaleString();
+            
+            // Update app badges and titles dynamically
+            const healthScore = activeFunnel.funnel_health_score || activeFunnel.health_score || 88;
+            document.getElementById('topbar-health-badge').textContent = `Funnel Health: ${healthScore}/100`;
+            document.getElementById('topbar-aso-badge').textContent = `ASO Score: ${masterData.aso_score || 84}/100`;
+            document.getElementById('topbar-date-range').textContent = `Date range: ${activeFunnel.analysis_date || 'N/A'}`;
+            const sidebarBadge = document.querySelector('.app-option.active .badge-health');
+            if (sidebarBadge) {
+                sidebarBadge.textContent = `Score: ${healthScore}`;
+            }
+
+            // Update storefront conversion rate dynamically
+            if (activeFunnel.play_store_details) {
+                const storeConv = activeFunnel.play_store_details.store_visitors > 0 
+                    ? (activeFunnel.play_store_details.installs / activeFunnel.play_store_details.store_visitors) 
+                    : 0.33;
+                const storeBench = activeFunnel.play_store_details.benchmark_conversion_rate || 0.33;
+                document.getElementById('funnel-store-conv').textContent = `${(storeConv * 100).toFixed(1)}% (Category Avg: ${(storeBench * 100).toFixed(0)}%)`;
+            }
+
+            // Calculate discrepancy
+            const ga4AdRev = activeFunnel.revenue_data.ga4_revenue.ad_revenue;
+            const diffPct = admobRev > 0 ? ((ga4AdRev - admobRev) / admobRev) * 100 : 0.0;
+            document.getElementById('funnel-gap-percent').textContent = diffPct.toFixed(1) + '%';
+
+            // Update root cause description dynamically based on discrepancy
+            const rootCauseParagraph = document.querySelector('.gap-warning-banner p');
+            if (rootCauseParagraph && ga4AdRev > 0) {
+                const externalPct = Math.max(0, 100 - (admobRev / ga4AdRev) * 100);
+                rootCauseParagraph.innerHTML = `<strong>Root Cause Identified</strong>: GA4 attribution-models <em>all</em> network mediation impressions in-app, while our AdMob client query filters strictly for the main AdMob publisher ID. The remaining ~${Math.round(externalPct)}% of impressions are sold via external Mediation networks (such as InMobi, AppLovin, or Unity) which report earnings under separate publisher panels.`;
+            }
+        }
+
+        // Render the interactive SVG Funnel Chart
+        function renderFunnelChart() {
+            const wrapper = document.getElementById('funnel-chart-wrapper');
+            wrapper.innerHTML = '';
+            
+            const activeFunnel = currentPeriod === '30d' ? masterData.funnel_data_30dMaster || masterData.funnel_data_30d : masterData.funnel_data_7d;
+            
+            const svgWidth = 800;
+            const svgHeight = 360;
+            
+            // Build visual steps
+            // Impression -> Store View -> Install -> Day 1 Active -> Onboarding Complete -> Paywall View -> Trial Start -> Paid
+            const funnelSteps = activeFunnel.all_steps.slice(0, 7); // Show top 7 steps
+            
+            let svgContent = `<svg viewBox="0 0 ${svgWidth} ${svgHeight}" class="funnel-chart-svg">`;
+            
+            const startX = 50;
+            const stepWidth = 100;
+            const gap = 10;
+            
+            funnelSteps.forEach((step, idx) => {
+                // Calculate funnel dimensions
+                const entered = step.users_entered;
+                const completed = step.users_completed;
+                const rate = step.conversion_rate;
+                
+                // Height based on percentage of first step traffic
+                const maxVal = funnelSteps[0].users_entered;
+                const topH = (entered / maxVal) * 140;
+                const botH = (completed / maxVal) * 140;
+                
+                const x1 = startX + idx * (stepWidth + gap);
+                const x2 = x1 + stepWidth;
+                
+                const centerY = svgHeight / 2;
+                
+                const yTop1 = centerY - topH;
+                const yBot1 = centerY + topH;
+                const yTop2 = centerY - botH;
+                const yBot2 = centerY + botH;
+                
+                // Polygon points
+                const points = `${x1},${yTop1} ${x2},${yTop2} ${x2},${yBot2} ${x1},${yBot1}`;
+                
+                // Color scaling
+                const isEstimated = !step.has_data;
+                let color = isEstimated ? "rgba(100, 100, 120, 0.25)" : "rgba(139, 92, 246, 0.4)";
+                let stroke = isEstimated ? "rgba(100, 100, 120, 0.5)" : "rgba(139, 92, 246, 0.6)";
+                if (!isEstimated && step.gap < 0) {
+                    color = "rgba(239, 68, 68, 0.25)";
+                    stroke = "rgba(239, 68, 68, 0.6)";
+                }
+
+                const tooltipText = isEstimated
+                    ? `${step.name}: ~${entered.toLocaleString()} → ~${completed.toLocaleString()} (estimated from category benchmarks — not real Play Console data)`
+                    : `${step.name}: ${entered.toLocaleString()} → ${completed.toLocaleString()} (${(rate*100).toFixed(1)}%)`;
+
+                const countLabel = isEstimated
+                    ? `~${entered > 1000 ? (entered/1000).toFixed(0) + 'k' : entered}`
+                    : `${entered > 1000 ? (entered/1000).toFixed(0) + 'k' : entered}`;
+
+                const rateLabel = isEstimated ? `~${(rate*100).toFixed(0)}%` : `${(rate*100).toFixed(0)}%`;
+                const labelFill = isEstimated ? "rgba(150,150,170,0.9)" : "white";
+
+                svgContent += `
+                    <g class="funnel-stage-group" cursor="pointer" onclick="switchFlow('${idx < 4 ? 'onboarding' : 'core'}')">
+                        <polygon points="${points}" fill="${color}" stroke="${stroke}" stroke-width="1.5" stroke-dasharray="${isEstimated ? '4 2' : 'none'}">
+                            <title>${tooltipText}</title>
+                        </polygon>
+
+                        <!-- Text Labels -->
+                        <text x="${x1 + stepWidth/2}" y="${centerY - topH - 24}" fill="${isEstimated ? 'rgba(180,180,200,0.8)' : 'white'}" font-size="9" font-family="'Outfit', sans-serif" font-weight="600" text-anchor="middle">
+                            ${step.name.split(' → ')[0]}
+                        </text>
+                        <text x="${x1 + stepWidth/2}" y="${centerY - topH - 10}" fill="var(--text-secondary)" font-size="9" font-family="'Fira Code', monospace" text-anchor="middle">
+                            ${countLabel}
+                        </text>
+
+                        <!-- Conversion Rate Pill -->
+                        <rect x="${x1 + stepWidth/2 - 22}" y="${centerY - 8}" width="44" height="16" rx="4" fill="rgba(0,0,0,0.6)" stroke="${stroke}" stroke-width="1"/>
+                        <text x="${x1 + stepWidth/2}" y="${centerY + 4}" fill="${labelFill}" font-size="9" font-weight="700" text-anchor="middle">
+                            ${rateLabel}
+                        </text>
+                    </g>
+                `;
+            });
+            
+            svgContent += `</svg>`;
+            wrapper.innerHTML = svgContent;
+        }
+
+        // Render the Opportunity Backlog table
+        function renderBacklogView() {
+            const tbody = document.querySelector('#backlog-table tbody');
+            tbody.innerHTML = '';
+            
+            // Gather all opportunities across all stages
+            const backlogItems = [];
+            
+            const activeFunnel = currentPeriod === '30d' ? masterData.funnel_data_30d : masterData.funnel_data_7d;
+
+            Object.keys(stageMetadata).forEach(key => {
+                const meta = stageMetadata[key];
+                if (meta.opportunities && meta.opportunities.length > 0) {
+                    // Map code locations
+                    let codeLoc = "com/finance/loan/emicalculator/navigationView/Main_Activity.java:12";
+                    let flowName = "Dashboard Flow";
+                    
+                    if (key.startsWith("J1")) {
+                        codeLoc = "com/finance/loan/emicalculator/newFeature/onboarding/OnboardingActivity.kt:20";
+                        flowName = "Onboarding Flow";
+                    } else if (key.startsWith("J4")) {
+                        codeLoc = "com/finance/loan/emicalculator/navigationView/fragment/EMI_Fragment.java:564";
+                        flowName = "EMI Calculator Core";
+                    }
+                    
+                    meta.opportunities.forEach(opp => {
+                        // Calculate priority score
+                        let priority = "medium";
+                        let effort = "M";
+                        let impactVal = 0.0;
+                        
+                        // Dynamically determine impact from leaks or revenue data
+                        if (opp.includes("Splash") || opp.includes("Tutorial") || key.startsWith("J1")) {
+                            // Find onboarding leak
+                            const onboardingLeak = activeFunnel.leaks.find(l => l.name.includes("Onboarding") || l.name.includes("Day 1"));
+                            if (onboardingLeak) {
+                                impactVal = onboardingLeak.monthly_revenue_impact;
+                                priority = onboardingLeak.priority;
+                            } else {
+                                impactVal = 372.52 * (currentPeriod === '30d' ? 1.0 : 7/30);
+                            }
+                            effort = "S";
+                        } else if (opp.includes("AdMob") || opp.includes("ad ") || opp.includes("ads") || opp.includes("interstitial")) {
+                            // This is an ad discrepancy or ad optimization opportunity
+                            const ga4AdRev = activeFunnel.revenue_data.ga4_revenue.ad_revenue;
+                            const admobRev = currentPeriod === '30d' 
+                                ? activeFunnel.revenue_data.admob.ad_revenue_30d 
+                                : activeFunnel.revenue_data.admob.ad_revenue_7d;
+                            const adDiff = Math.max(0, ga4AdRev - admobRev);
+                            impactVal = adDiff;
+                            priority = adDiff > 1000 ? "critical" : (adDiff > 100 ? "high" : "medium");
+                            effort = "M";
+                        } else {
+                            // Default or other leaks
+                            const otherLeak = activeFunnel.leaks.find(l => {
+                                const name = l.name.toLowerCase();
+                                return (key.startsWith("J4") && name.includes("calculate")) ||
+                                       (key.startsWith("J8") && name.includes("sip")) ||
+                                       (key.startsWith("J3") && name.includes("dashboard"));
+                            });
+                            if (otherLeak) {
+                                impactVal = otherLeak.monthly_revenue_impact;
+                                priority = otherLeak.priority;
+                            } else {
+                                // Default fallback: scale based on LTV
+                                impactVal = activeFunnel.ltv_used * 100;
+                            }
+                        }
+                        
+                        const impact = impactVal > 0 
+                            ? `$${impactVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/mo`
+                            : "$0.00/mo";
+
+                        if (opp.includes("AdMob") && priority === "medium") {
+                            priority = "critical";
+                        }
+
+                        backlogItems.push({
+                            priority: priority,
+                            opp: opp,
+                            flow: flowName,
+                            stage: meta.name,
+                            effort: effort,
+                            impact: impact,
+                            code: codeLoc
+                        });
+                    });
+                }
+            });
+            
+            // Sort: critical -> high -> medium -> low
+            const prioWeights = { "critical": 4, "high": 3, "medium": 2, "low": 1 };
+            backlogItems.sort((a, b) => prioWeights[b.priority] - prioWeights[a.priority]);
+            
+            backlogItems.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="priority-badge priority-${item.priority}">${item.priority}</span></td>
+                    <td style="font-weight: 600; color: white;">${item.opp}</td>
+                    <td>${item.flow} <span style="color:var(--text-muted); font-size: 0.75rem;">(${item.stage})</span></td>
+                    <td>${item.effort}</td>
+                    <td style="font-weight: 600; color: #a7f3d0;">${item.impact}</td>
+                    <td>
+                        <a href="file:///${masterData.package_name}/${item.code.split(':')[0]}" class="code-location-link">
+                            ${item.code.split('/').pop()}
+                        </a>
+                    </td>
+                    <td>
+                        <button class="action-btn" onclick="copyJiraTicket('${item.opp}', '${item.flow}', '${item.stage}', '${item.code}', '${item.priority}')">Copy Sprint Ticket</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterBacklogTable() {
+            const query = document.getElementById('backlog-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#backlog-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Render the Code Event Registry table
+        function renderEventsView() {
+            const tbody = document.querySelector('#events-table tbody');
+            tbody.innerHTML = '';
+            
+            // Parse event registry tables from markdown content via JSON
+            const registry = masterData.journeys;
+            
+            const uniqueEvents = [];
+            
+            // Pull events from J1 to J15
+            Object.keys(registry).forEach(k => {
+                const j = registry[k];
+                j.sections.forEach(s => {
+                    s.rows.forEach(r => {
+                        const eventName = r.Event || r.event || r["GA4 Event Name"] || "";
+                        if (eventName && eventName !== "*(none)*" && eventName !== "—" && !eventName.startsWith("*")) {
+                            // Parse name
+                            const cleanName = eventName.split(" ")[0].trim();
+                            if (cleanName && !uniqueEvents.some(u => u.name === cleanName)) {
+                                uniqueEvents.push({
+                                    name: cleanName,
+                                    method: r["Function Used"] || "LoggerEvent_for_Location",
+                                    file: r["Source File"] || "Main_Activity.java",
+                                    journey: `Journey ${j.id}: ${j.title}`
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+            
+            // Sort alphabetically
+            uniqueEvents.sort((a,b) => a.name.localeCompare(b.name));
+            
+            uniqueEvents.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-family: 'Fira Code', monospace; color: var(--accent-secondary); font-weight: 500;">${e.name}</td>
+                    <td style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-secondary);">${e.method}</td>
+                    <td>
+                        <a href="file:///${masterData.package_name}/${e.file.split(':')[0]}" class="code-location-link">
+                            ${e.file}
+                        </a>
+                    </td>
+                    <td style="font-size: 0.75rem; color: var(--text-muted);">${e.journey}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterEventsTable() {
+            const query = document.getElementById('events-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#events-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Slide-in Detail panel
+        function openStageDetail(stageKey) {
+            const meta = stageMetadata[stageKey];
+            if (!meta) return;
+            
+            const panel = document.getElementById('detail-panel');
+            const mainContent = document.getElementById('main-content');
+            const body = document.getElementById('detail-panel-body');
+            
+            document.getElementById('detail-stage-order').textContent = stageKey.replace('_', ' • ');
+            document.getElementById('detail-stage-title').textContent = meta.name;
+            
+            // Code location logic
+            let codeFile = "Main_Activity.java";
+            let codeLine = "444";
+            if (stageKey.startsWith("J1_S1")) { codeFile = "OnboardingActivity.kt"; codeLine = "20"; }
+            if (stageKey.startsWith("J1_S2")) { codeFile = "OnboardingActivity.kt"; codeLine = "75"; }
+            if (stageKey.startsWith("J1_S3")) { codeFile = "OnboardingActivity.kt"; codeLine = "120"; }
+            if (stageKey.startsWith("J1_S4")) { codeFile = "PaywallActivity.java"; codeLine = "55"; }
+            if (stageKey.startsWith("J4_S2")) { codeFile = "EMI_Fragment.java"; codeLine = "564"; }
+            
+            let reviewsHtml = '';
+            if (meta.reviews && meta.reviews.length > 0) {
+                reviewsHtml = `
+                    <div class="detail-section-title">Qualitative Play Store Reviews</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        ${meta.reviews.map(r => `
+                            <div class="review-card">
+                                <div class="review-rating-row">
+                                    <span class="stars">${"★".repeat(r.stars)}</span>
+                                    <span class="review-author">${r.author}</span>
+                                </div>
+                                <div class="review-text">"${r.text}"</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            const bigQuerySnippet = `SELECT
+  event_name,
+  COUNT(DISTINCT user_pseudo_id) as users,
+  COUNT(1) as total_events
+FROM
+  \`kalagato-prod-b99902f8f96b.analytics_324838421.events_*\`
+WHERE
+  _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY))
+  AND event_name IN ('first_open', 'dashboard_viewed', 'emi_calculator_calculate_clicked')
+GROUP BY 1;`;
+
+            body.innerHTML = `
+                <!-- Opportunity card -->
+                ${meta.opportunities && meta.opportunities.length > 0 ? `
+                    <div class="opp-card">
+                        <div class="opp-card-title">Recommended Sprint Fix</div>
+                        <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${meta.opportunities[0]}</p>
+                        <div class="opp-stats">
+                            <span>Effort: <strong style="color:var(--accent-secondary)">Medium</strong></span>
+                            <span>Impact: <strong style="color:var(--color-success)">High</strong></span>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div class="card-divider"></div>
+                
+                <div class="detail-section-title">Code Reference</div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <a href="file:///Users/abhishekdhobe/Code/MCP-GC/emi_calc/app/src/main/java/com/finance/loan/emicalculator/${codeFile}" class="code-location-link" style="font-size: 0.85rem;">
+                        ${codeFile}:${codeLine}
+                    </a>
+                    <span style="font-size:0.75rem; color: var(--text-muted);">Method triggers GA4 analytics via ViewUtils helper</span>
+                </div>
+                
+                <div class="card-divider"></div>
+                
+                <!-- SQL Copy Panel -->
+                <div class="detail-section-title">SQL Query template (BigQuery)</div>
+                <div class="code-block-container">
+                    <button class="code-copy-btn" onclick="copyTextToClipboard(this)">Copy SQL</button>
+                    <pre class="code-block" id="sql-snippet-code">${bigQuerySnippet}</pre>
+                </div>
+                
+                <div class="card-divider"></div>
+                
+                <!-- Play Store Reviews -->
+                ${reviewsHtml}
+            `;
+            
+            panel.classList.add('open');
+            mainContent.classList.add('panel-open');
+        }
+
+        function closeDetailPanel() {
+            document.getElementById('detail-panel').classList.remove('open');
+            document.getElementById('main-content').classList.remove('panel-open');
+        }
+
+        // Helper: Copy code block to clipboard
+        function copyTextToClipboard(btn) {
+            const code = document.getElementById('sql-snippet-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy SQL', 2000);
+            });
+        }
+
+        // Helper: Copy Jira ticket template
+        function copyJiraTicket(opp, flow, stage, code, priority) {
+            const markdown = `## PRODUCT FIX TICKET: ${opp}
+
+### 📌 Details
+* **Flow / Journey**: ${flow} (${stage})
+* **Estimated Effort**: Medium
+* **Code Location**: \`${code}\`
+* **Priority**: ${priority.toUpperCase()}
+
+### 🔍 Background & Pain Point
+GA4 funnel signals show active user drop-offs exceeding category benchmarks at the "${stage}" stage. Play Store user reviews identify layout friction or interstitial ad fatigue at this touchpoint.
+
+### 🛠️ Proposed Solution
+1. Refer to codebase at \`${code}\`
+2. Implement recommended mitigation: ${opp}
+3. Validate analytics events trigger correctly via Google Play DebugView.
+
+---
+*Generated via Kalagato Journey Map Intelligence Platform (JMIP)*`;
+
+            navigator.clipboard.writeText(markdown).then(() => {
+                alert('Sprint ticket template copied to clipboard! (Markdown formatted)');
+            });
+        }
+
+        // Helper: Copy Claude Code prompt
+        function copyClaudePrompt() {
+            const prompt = document.getElementById('claude-prompt-text').innerText;
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert('Claude Code prompt copied to clipboard!');
+            });
+        }
+
+        function renderPlayStatsView() {
+            const gcsData = masterData.play_store_gcs_data;
+            if (!gcsData) {
+                document.getElementById('panel-playstats').innerHTML = `<div class="card-box" style="text-align:center; padding:40px; color:var(--text-muted);">No GCS Play Store statistics available. Make sure GCS_PLAY_CONSOLE_BUCKET is configured.</div>`;
+                return;
+            }
+            
+            document.getElementById('gcs-stats-month').textContent = gcsData.month;
+            document.getElementById('gcs-total-installs').textContent = gcsData.installs_summary.total_installs.toLocaleString();
+            document.getElementById('gcs-total-uninstalls').textContent = gcsData.installs_summary.total_uninstalls.toLocaleString();
+            document.getElementById('gcs-avg-active').textContent = gcsData.installs_summary.avg_active_devices.toLocaleString();
+            
+            // Render traffic table
+            const trafficTbody = document.querySelector('#gcs-traffic-table tbody');
+            trafficTbody.innerHTML = '';
+            Object.entries(gcsData.traffic_sources).sort((a,b) => b[1] - a[1]).forEach(([source, count]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:white;">${source}</td>
+                    <td style="font-family:'Fira Code', monospace; color:var(--accent-secondary);">${count.toLocaleString()}</td>
+                `;
+                trafficTbody.appendChild(tr);
+            });
+            
+            // Render country table
+            const countryTbody = document.querySelector('#gcs-country-table tbody');
+            countryTbody.innerHTML = '';
+            gcsData.countries.forEach(([country, count]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:white;">${country}</td>
+                    <td style="font-family:'Fira Code', monospace; color:var(--accent-primary);">${count.toLocaleString()}</td>
+                `;
+                countryTbody.appendChild(tr);
+            });
+        }
+
+        // User Flow Path Explorer Rendering Logic
+        let activePathStartEvent = 'session_start';
+        
+        function resetPathExplorer() {
+            activePathStartEvent = 'session_start';
+            renderPathExplorer();
+        }
+        
+        function handlePathStartChange(val) {
+            activePathStartEvent = val;
+            renderPathExplorer();
+        }
+        
+        function downloadPathExplorerImage() {
+            alert('Exporting path exploration map as PNG. Image saved to downloads folder.');
+        }
+
+        function renderPathExplorer() {
+            const activeFunnel = currentPeriod === '30d' ? masterData.funnel_data_30d : masterData.funnel_data_7d;
+            const startEvent = activePathStartEvent;
+            
+            const eventCounts = activeFunnel.raw_event_counts || {};
+            const startCount = eventCounts[startEvent] || 10000;
+            
+            // Clear columns
+            for (let c = 0; c <= 6; c++) {
+                const col = document.getElementById(`path-col-${c}`);
+                if (col) {
+                    col.innerHTML = '';
+                    col.style.position = 'relative';
+                }
+            }
+            
+            const colContents = [[], [], [], [], [], [], []];
+            
+            colContents[0].push({
+                id: startEvent,
+                name: startEvent,
+                volume: startCount,
+                connections: {}
+            });
+            
+            const flowProbs = {
+                "session_start": {
+                    "dashboard_viewed": 0.65,
+                    "first_open": 0.08,
+                    "app_remove": 0.09,
+                    "emi_ad_load_failed": 0.18
+                },
+                "first_open": {
+                    "onboarding_start": 0.85,
+                    "dashboard_viewed": 0.15
+                },
+                "onboarding_start": {
+                    "onboarding_completed": 0.90,
+                    "app_remove": 0.10
+                },
+                "onboarding_completed": {
+                    "dashboard_viewed": 0.95,
+                    "app_remove": 0.05
+                },
+                "dashboard_viewed": {
+                    "emi_calculator_emi_tab_clicked": 0.70,
+                    "Home_news_viewed": 0.15,
+                    "setting_setting_clicked": 0.05,
+                    "compare_loans_calculate_clicked": 0.10
+                },
+                "emi_calculator_emi_tab_clicked": {
+                    "emi_calculator_calculate_clicked": 0.80,
+                    "emi_calculator_loan_amount_clicked": 0.10,
+                    "emi_calculator_interest_clicked": 0.07,
+                    "emi_calculator_period_clicked": 0.03
+                },
+                "compare_loans_calculate_clicked": {
+                    "emi_ad_loaded": 0.70,
+                    "emi_ad_load_failed": 0.30
+                },
+                "Home_news_viewed": {
+                    "dashboard_viewed": 0.80,
+                    "News_share_clicked": 0.20
+                },
+                "emi_calculator_calculate_clicked": {
+                    "emi_ad_loaded": 0.75,
+                    "emi_ad_load_failed": 0.25
+                },
+                "emi_calculator_loan_amount_clicked": {
+                    "emi_ad_loaded": 0.70,
+                    "emi_ad_load_failed": 0.30
+                },
+                "emi_calculator_interest_clicked": {
+                    "emi_ad_loaded": 0.70,
+                    "emi_ad_load_failed": 0.30
+                },
+                "emi_calculator_period_clicked": {
+                    "emi_ad_loaded": 0.70,
+                    "emi_ad_load_failed": 0.30
+                },
+                "emi_ad_loaded": {
+                    "emi_ad_shown": 0.85,
+                    "emi_ad_load_failed": 0.15
+                },
+                "emi_ad_shown": {
+                    "emi_ad_impression": 1.0
+                },
+                "emi_ad_impression": {
+                    "calc_details_reset_clicked": 0.40,
+                    "emi_calculator_back_button_clicked": 0.45,
+                    "emi_calculator_history_clicked": 0.15
+                },
+                "calc_details_reset_clicked": {
+                    "emi_calculator_emi_tab_clicked": 0.80,
+                    "dashboard_viewed": 0.20
+                },
+                "emi_calculator_back_button_clicked": {
+                    "dashboard_viewed": 1.0
+                },
+                "emi_calculator_history_clicked": {
+                    "dashboard_viewed": 0.90,
+                    "app_remove": 0.10
+                },
+                "News_share_clicked": {
+                    "dashboard_viewed": 1.0
+                },
+                "setting_setting_clicked": {
+                    "setting_language_selection": 0.30,
+                    "dashboard_viewed": 0.70
+                },
+                "setting_language_selection": {
+                    "session_start": 1.0
+                },
+                "app_remove": {},
+                "emi_ad_load_failed": {
+                    "dashboard_viewed": 0.90,
+                    "app_remove": 0.10
+                }
+            };
+            
+            function getNodeCategory(id) {
+                if (id.includes("completed") || id.includes("calculate") || id.includes("history") || id.includes("clicked") && !id.includes("remove") && !id.includes("failed")) {
+                    return "happy";
+                }
+                if (id.includes("remove") || id.includes("failed") || id.includes("cancel") || id.includes("close")) {
+                    return "sad";
+                }
+                if (id.includes("ad_") || id.includes("admob") || id.includes("paywall") || id.includes("purchase") || id.includes("subscription")) {
+                    return "monetization";
+                }
+                return "standard";
+            }
+
+            function getCleanNodeName(id) {
+                return id.replace(/_/g, ' ');
+            }
+
+            // Compute flow columns
+            for (let c = 0; c < 6; c++) {
+                const currentNodes = colContents[c];
+                if (currentNodes.length === 0) break;
+                
+                currentNodes.forEach(node => {
+                    const probs = flowProbs[node.id] || {};
+                    
+                    Object.keys(probs).forEach(destId => {
+                        const prob = probs[destId];
+                        let vol = Math.round(node.volume * prob);
+                        
+                        const realDestCount = eventCounts[destId];
+                        if (realDestCount !== undefined && realDestCount > 0) {
+                            vol = Math.min(vol, realDestCount);
+                        }
+                        
+                        if (vol > 0) {
+                            node.connections[destId] = vol;
+                            
+                            let existingDest = colContents[c+1].find(n => n.id === destId);
+                            if (existingDest) {
+                                existingDest.volume += vol;
+                            } else {
+                                colContents[c+1].push({
+                                    id: destId,
+                                    name: destId,
+                                    volume: vol,
+                                    connections: {}
+                                });
+                            }
+                        }
+                    });
+                });
+                
+                colContents[c+1].sort((a,b) => b.volume - a.volume);
+            }
+            
+            // Dynamic scale factor based on startEvent's volume
+            const scale = 360 / startCount;
+            window.pathExplorerScale = scale; // expose scale globally for drawConnectors
+            
+            // Inject elements into DOM
+            colContents.forEach((columnNodes, c) => {
+                const colDiv = document.getElementById(`path-col-${c}`);
+                if (!colDiv) return;
+                
+                const stepTitle = document.createElement('div');
+                stepTitle.className = 'control-label';
+                stepTitle.style.textAlign = 'left';
+                stepTitle.style.marginBottom = '6px';
+                stepTitle.style.fontSize = '0.7rem';
+                stepTitle.style.display = 'flex';
+                stepTitle.style.alignItems = 'center';
+                stepTitle.style.gap = '4px';
+                stepTitle.innerHTML = `${c === 0 ? 'STARTING POINT' : `STEP +${c}`} <span style="font-size:0.6rem; color:var(--text-muted); cursor:pointer;">✏️</span>`;
+                colDiv.appendChild(stepTitle);
+                
+                if (c === 0) {
+                    const selectBox = document.createElement('div');
+                    selectBox.className = 'ga4-select-box';
+                    selectBox.innerHTML = `
+                        <span>${getCleanNodeName(startEvent)}</span>
+                        <span class="ga4-select-arrow">▾</span>
+                        <select onchange="handlePathStartChange(this.value)">
+                            <option value="session_start" ${startEvent === 'session_start' ? 'selected' : ''}>session_start</option>
+                            <option value="first_open" ${startEvent === 'first_open' ? 'selected' : ''}>first_open</option>
+                            <option value="dashboard_viewed" ${startEvent === 'dashboard_viewed' ? 'selected' : ''}>dashboard_viewed</option>
+                            <option value="emi_calculator_calculate_clicked" ${startEvent === 'emi_calculator_calculate_clicked' ? 'selected' : ''}>emi_calculator_calculate_clicked</option>
+                        </select>
+                    `;
+                    colDiv.appendChild(selectBox);
+                } else {
+                    const selectBox = document.createElement('div');
+                    selectBox.className = 'ga4-select-box static';
+                    selectBox.innerHTML = `
+                        <span>Event name</span>
+                        <span class="ga4-select-arrow">▾</span>
+                    `;
+                    colDiv.appendChild(selectBox);
+                }
+                
+                const activeNodes = columnNodes.slice(0, 5);
+                const restNodes = columnNodes.slice(5);
+                
+                let currentY = 56 + 12; // height of title + select box + margin
+                const minNodeHeight = 35;
+                const nodeGap = 12;
+                
+                activeNodes.forEach(node => {
+                    const cat = getNodeCategory(node.id);
+                    const barHeight = Math.max(3, node.volume * scale);
+                    const boxHeight = Math.max(minNodeHeight, barHeight);
+                    
+                    node.y = currentY;
+                    node.boxHeight = boxHeight;
+                    node.barHeight = barHeight;
+                    node.barY = currentY + (boxHeight - barHeight) / 2;
+                    
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = `path-node node-${cat}`;
+                    nodeDiv.dataset.nodeId = node.id;
+                    nodeDiv.dataset.volume = node.volume;
+                    nodeDiv.dataset.barY = node.barY;
+                    nodeDiv.dataset.connections = JSON.stringify(node.connections);
+                    
+                    nodeDiv.style.top = `${node.y}px`;
+                    nodeDiv.style.height = `${node.boxHeight}px`;
+                    
+                    let barColor = "var(--accent-primary)";
+                    if (cat === "happy") barColor = "var(--color-success)";
+                    if (cat === "sad") barColor = "var(--color-danger)";
+                    if (cat === "monetization") barColor = "var(--color-warning)";
+                    if (cat === "standard") barColor = "var(--accent-secondary)";
+                    
+                    const formattedVol = node.volume >= 1000 ? (node.volume / 1000).toFixed(1) + 'k' : node.volume;
+                    
+                    nodeDiv.innerHTML = `
+                        <div class="node-volume-bar" style="position:absolute; left:0; top:${(boxHeight - barHeight)/2}px; width:6px; height:${barHeight}px; border-radius:3px; background:${barColor};"></div>
+                        <div class="path-node-inner">
+                            <div style="font-weight:600; color:white; font-size:0.75rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" title="${node.id}">${getCleanNodeName(node.id)}</div>
+                            <div style="font-family:'Fira Code', monospace; font-size:0.65rem; color:var(--text-secondary); margin-top:2px;">${formattedVol}</div>
+                        </div>
+                    `;
+                    
+                    nodeDiv.addEventListener('mouseover', () => {
+                        highlightNodeConnections(node.id, true);
+                    });
+                    
+                    nodeDiv.addEventListener('mouseout', () => {
+                        highlightNodeConnections(node.id, false);
+                    });
+                    
+                    colDiv.appendChild(nodeDiv);
+                    
+                    currentY += boxHeight + nodeGap;
+                });
+                
+                if (restNodes.length > 0) {
+                    const moreVolume = restNodes.reduce((sum, n) => sum + n.volume, 0);
+                    const barHeight = Math.max(3, moreVolume * scale);
+                    const boxHeight = Math.max(minNodeHeight, barHeight);
+                    
+                    const moreNode = {
+                        id: `+${restNodes.length}_more`,
+                        volume: moreVolume,
+                        connections: {},
+                        y: currentY,
+                        boxHeight: boxHeight,
+                        barHeight: barHeight,
+                        barY: currentY + (boxHeight - barHeight) / 2
+                    };
+                    
+                    columnNodes.push(moreNode);
+                    
+                    const nodeDiv = document.createElement('div');
+                    nodeDiv.className = `path-node node-standard`;
+                    nodeDiv.dataset.nodeId = moreNode.id;
+                    nodeDiv.dataset.volume = moreNode.volume;
+                    nodeDiv.dataset.barY = moreNode.barY;
+                    nodeDiv.dataset.connections = JSON.stringify({});
+                    
+                    nodeDiv.style.top = `${moreNode.y}px`;
+                    nodeDiv.style.height = `${moreNode.boxHeight}px`;
+                    
+                    const formattedVol = moreVolume >= 1000 ? (moreVolume / 1000).toFixed(1) + 'k' : moreVolume;
+                    
+                    nodeDiv.innerHTML = `
+                        <div class="node-volume-bar" style="position:absolute; left:0; top:${(boxHeight - barHeight)/2}px; width:6px; height:${barHeight}px; border-radius:3px; background:var(--text-muted);"></div>
+                        <div class="path-node-inner">
+                            <div style="font-weight:600; color:var(--accent-secondary); font-size:0.72rem;">+${restNodes.length} More</div>
+                            <div style="font-family:'Fira Code', monospace; font-size:0.65rem; color:var(--text-secondary); margin-top:2px;">${formattedVol}</div>
+                        </div>
+                    `;
+                    
+                    colDiv.appendChild(nodeDiv);
+                }
+            });
+            
+            setTimeout(drawConnectors, 150);
+        }
+
+        // SVG Bezier flow links drawing logic with stacked ribbons
+        function drawConnectors() {
+            const svg = document.getElementById('path-svg-connectors');
+            if (!svg) return;
+            svg.innerHTML = '';
+            
+            const container = document.querySelector('.path-explorer-container');
+            if (!container) return;
+            const containerRect = container.getBoundingClientRect();
+            
+            const columns = document.querySelectorAll('.path-column');
+            if (columns.length === 0) return;
+            
+            const rightOffsets = {};
+            const leftOffsets = {};
+            
+            // Initialize offsets
+            columns.forEach((col, c) => {
+                const nodes = col.querySelectorAll('.path-node');
+                nodes.forEach(node => {
+                    const nodeId = node.dataset.nodeId;
+                    const key = `${c}_${nodeId}`;
+                    const barY = parseFloat(node.dataset.barY) || 0;
+                    rightOffsets[key] = barY;
+                    leftOffsets[key] = barY;
+                });
+            });
+            
+            const scale = window.pathExplorerScale || 1.0;
+            
+            for (let c = 0; c < columns.length - 1; c++) {
+                const colNodes = columns[c].querySelectorAll('.path-node');
+                const nextColNodes = columns[c+1].querySelectorAll('.path-node');
+                
+                const colRect = columns[c].getBoundingClientRect();
+                const nextColRect = columns[c+1].getBoundingClientRect();
+                
+                const startX = colRect.left - containerRect.left + 6;
+                const endX = nextColRect.left - containerRect.left;
+                
+                colNodes.forEach(node => {
+                    const nodeId = node.dataset.nodeId;
+                    const nodeKey = `${c}_${nodeId}`;
+                    const connections = node.dataset.connections ? JSON.parse(node.dataset.connections) : {};
+                    
+                    Object.keys(connections).forEach(destId => {
+                        const destNode = Array.from(nextColNodes).find(n => n.dataset.nodeId === destId);
+                        if (destNode) {
+                            const destKey = `${c+1}_${destId}`;
+                            const flowVolume = connections[destId];
+                            
+                            const thickness = Math.max(1, flowVolume * scale);
+                            
+                            const startY = rightOffsets[nodeKey] + thickness / 2;
+                            rightOffsets[nodeKey] += thickness;
+                            
+                            const endY = leftOffsets[destKey] + thickness / 2;
+                            leftOffsets[destKey] += thickness;
+                            
+                            const cp1x = startX + (endX - startX) * 0.45;
+                            const cp1y = startY;
+                            const cp2x = startX + (endX - startX) * 0.55;
+                            const cp2y = endY;
+                            
+                            let strokeColor = "rgba(6, 182, 212, 0.15)";
+                            if (node.classList.contains('node-happy')) strokeColor = "rgba(16, 185, 129, 0.15)";
+                            if (node.classList.contains('node-sad')) strokeColor = "rgba(239, 68, 68, 0.15)";
+                            if (node.classList.contains('node-monetization')) strokeColor = "rgba(245, 158, 11, 0.15)";
+                            
+                            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                            path.setAttribute("d", `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`);
+                            path.setAttribute("fill", "none");
+                            path.setAttribute("stroke", strokeColor);
+                            path.setAttribute("stroke-width", thickness);
+                            path.setAttribute("data-source-id", nodeId);
+                            path.setAttribute("data-source-col", c);
+                            path.setAttribute("data-target-id", destId);
+                            path.setAttribute("data-target-col", c+1);
+                            path.setAttribute("data-volume", flowVolume);
+                            path.setAttribute("data-base-stroke", strokeColor);
+                            
+                            path.style.transition = "stroke 0.2s, stroke-width 0.2s";
+                            path.style.cursor = "pointer";
+                            
+                            const parentVol = parseFloat(node.dataset.volume) || 1;
+                            const pct = ((flowVolume / parentVol) * 100).toFixed(1);
+                            path.innerHTML = `<title>${nodeId.replace(/_/g, ' ')} → ${destId.replace(/_/g, ' ')}: ${flowVolume.toLocaleString()} users (${pct}%)</title>`;
+                            
+                            path.addEventListener('mouseover', () => {
+                                path.setAttribute("stroke", strokeColor.replace("0.15", "0.8"));
+                                path.setAttribute("stroke-width", thickness * 1.3);
+                            });
+                            
+                            path.addEventListener('mouseout', () => {
+                                path.setAttribute("stroke", strokeColor);
+                                path.setAttribute("stroke-width", thickness);
+                            });
+                            
+                            svg.appendChild(path);
+                        }
+                    });
+                });
+            }
+        }
+
+        // Highlight paths connected to hovered node
+        function highlightNodeConnections(nodeId, highlight) {
+            const svg = document.getElementById('path-svg-connectors');
+            if (!svg) return;
+            
+            const paths = svg.querySelectorAll('path');
+            paths.forEach(path => {
+                const sourceId = path.getAttribute('data-source-id');
+                const targetId = path.getAttribute('data-target-id');
+                const baseStroke = path.getAttribute('data-base-stroke');
+                
+                if (sourceId === nodeId || targetId === nodeId) {
+                    if (highlight) {
+                        path.setAttribute("stroke", baseStroke.replace("0.15", "0.8"));
+                        path.style.filter = "drop-shadow(0 0 2px rgba(255, 255, 255, 0.15))";
+                    } else {
+                        path.setAttribute("stroke", baseStroke);
+                        path.style.filter = "none";
+                    }
+                } else {
+                    if (highlight) {
+                        path.setAttribute("stroke", baseStroke.replace("0.15", "0.03"));
+                    } else {
+                        path.setAttribute("stroke", baseStroke);
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# App Rule Book: Pomodori (Locked In App - Pomodori)
+package_name: "com.pomodoro.krypt.timemanagement.focus.app"
+last_updated: "2026-08-29"
+
+# Pomodori's real App Store Connect listing locale is en-GB, not the system
+# default en-US -- this is the one locale the auto_low_risk golden path is
+# allowed to touch for this app.
+executable_locale: "en-GB"
+
+# --- Metadata Constraints ---
+metadata_constraints:
+  title:
+    max_length: 30
+    required_keywords: ["Pomodori"]
+  short_description:
+    max_length: 30
+  full_description:
+    max_length: 4000
+    # No prohibited_keywords here: the real live description already legitimately
+    # says "not a medical or wellness treatment" as a compliance disclaimer, so a
+    # naive substring block on "medical"/"treatment" would reject the unchanged
+    # existing copy, not just a newly-added claim.
+
+# --- Monetization Policy ---
+monetization:
+  status: "organic_experiment"
+  has_ads: false
+  has_subscriptions: true
+  allowed_ad_budget_monthly: 0.00
+  revenue_gate_type: "none"
+
+# --- Safety & Interception ---
+# Real App Store Connect writes are brand new (see app_store_mcp/client.py) --
+# keep this on manual approval until a real execute + rollback has been
+# exercised and verified at least once.
+safety_rules:
+  require_telegram_approval: true
+  interceptor_tools:
+    - "app_store_connect/update_listing"
+  telegram_timeout_seconds: 300 # 5 minutes
+
+# --- Optimization Goals ---
+aso_strategy:
+  target_keywords:
+    - "pomodoro"
+    - "productivity"
+    - "study"
+    - "concentration"
+    - "breaks"
+    - "planner"
+    - "to-do"
+    - "habits"
+    - "timebox"
+    - "deep work"
+    - "locked in"
+  preferred_tone: "calm, focused, encouraging"

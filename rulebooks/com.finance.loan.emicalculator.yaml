@@ -1,0 +1,43 @@
+# App Rule Book: EMI Calculator
+package_name: "com.finance.loan.emicalculator"
+last_updated: "2026-06-18"
+
+# --- Metadata Constraints ---
+metadata_constraints:
+  title:
+    max_length: 50
+    required_keywords: ["EMI Calculator", "Loan"]
+  short_description:
+    max_length: 80
+  full_description:
+    max_length: 4000
+    prohibited_keywords:
+      - "quick cash"
+      - "instant loan payout"
+
+# --- Monetization Policy ---
+monetization:
+  status: "organic_experiment"
+  has_ads: true
+  has_subscriptions: false
+  allowed_ad_budget_monthly: 0.00
+  revenue_gate_type: "none"
+
+# --- Safety & Interception ---
+safety_rules:
+  require_telegram_approval: true
+  interceptor_tools:
+    - "play_store/update_listing"
+    - "play_store/deploy_app"
+  telegram_timeout_seconds: 300 # 5 minutes
+
+# --- Optimization Goals ---
+aso_strategy:
+  target_keywords:
+    - "loan emi"
+    - "emi calculator"
+    - "loan calculator"
+    - "finance calculator"
+    - "interest calculator"
+    - "mortgage calculator"
+  preferred_tone: "professional, precise, simple"
