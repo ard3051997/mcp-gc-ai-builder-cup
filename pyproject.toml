@@ -49,7 +49,7 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn>=0.22.0",
     "apscheduler>=3.10.0",
-    "google-ads>=22.0.0",
+    "google-ads>=33.0.0",
     "google-genai>=1.0.0",
 ]
 
