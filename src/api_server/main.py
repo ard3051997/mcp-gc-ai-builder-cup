@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from funnel_engine.db import DEFAULT_DB_PATH, init_db
 
 from .auth import ApiSecurityMiddleware
+from .demo_data import DemoDataMiddleware
 from .routes import actions, apps, experiments, portfolio, system, webhooks
 
 init_db(DEFAULT_DB_PATH)
@@ -55,6 +56,8 @@ app.add_middleware(
 # Security remains outside CORS so authenticated proxy headers are required even
 # for preflight requests when secure mode is enabled.
 app.add_middleware(ApiSecurityMiddleware)
+# Outermost: serves labelled sample data on the public demo when MCP_GC_DEMO_DATA is on.
+app.add_middleware(DemoDataMiddleware)
 
 # Include routers
 app.include_router(portfolio.router, prefix="/api/portfolio", tags=["portfolio"])
