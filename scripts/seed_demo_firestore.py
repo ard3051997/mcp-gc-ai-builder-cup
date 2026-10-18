@@ -51,6 +51,7 @@ for typ, tool, why, exp_id, days_ago in actions:
     ts = now - timedelta(days=days_ago)
     db.collection("action_log").add({
         "app_package": APP, "action_type": typ, "tool_name": tool, "reasoning": why,
+        "result": "ok: " + why.split(";")[0].split(".")[0], "safety_decision": "allowed",
         "experiment_id": exp_id, "created_by": "demo-seed",
         "timestamp": ts.isoformat(), "ts_ms": int(ts.timestamp() * 1000) + int(time.time()) % 7,
     })

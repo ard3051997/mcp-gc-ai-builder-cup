@@ -16,6 +16,7 @@ from pydantic import BaseModel, ValidationError
 
 from analytics_mcp.client import AnalyticsClient
 from api_server.auth import config_writes_enabled
+from api_server.demo_data import demo_enabled, grounded_answer
 from api_server.routes.portfolio import get_apps_config
 from app_manager import store_listing_client
 from app_manager.agents import create_coordinator_agent
@@ -319,6 +320,11 @@ def _create_via_experiment_lifecycle(payload: Mapping[str, Any]) -> dict[str, An
 
 
 async def generate_app_diagnostic_live(package: str) -> str:
+    if demo_enabled():
+        return await grounded_answer(
+            package,
+            "Write a short funnel diagnostic: primary bottleneck, estimated monthly revenue impact, recommended action.",
+        )
     config = _app_manager_config(package)
     agent_config = create_coordinator_agent(config)
     prompt = (
@@ -337,6 +343,11 @@ async def generate_app_diagnostic_live(package: str) -> str:
 
 async def _run_agent_chat(package: str, question: str) -> str:
     """Run the coordinator agent with a freeform question about the app."""
+    if demo_enabled():
+        try:
+            return await grounded_answer(package, question)
+        except Exception as exc:
+            return f"I couldn't complete the analysis right now: {exc}"
     config = _app_manager_config(package)
     # Inject app context into the question
     prompt = (

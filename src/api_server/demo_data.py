@@ -204,11 +204,76 @@ def system_status() -> dict[str, Any]:
     }
 
 
+def listing(pkg: str) -> dict[str, Any]:
+    name = APPS[pkg]["name"]
+    title = "EMI Calculator - Loan & Home EMI" if "emi" in pkg else f"{name} - Night Clock & Alarm"
+    return {
+        "status": "ok", "title": title,
+        "short_description": "Calculate loan EMI, interest and amortization schedules in seconds.",
+        "full_description": (
+            f"{name} helps you plan every loan with clarity. Compare tenures, see total interest, and export a full "
+            "amortization schedule. Works offline, no sign-up required."
+        ),
+        "default_language": "en-US", "locale": "en-US", "version": "sample-1",
+        "fetched_at": datetime.now(UTC).isoformat(),
+        "provenance": {"source": "demo_sample", "live": False, "is_live": False,
+                       "retrieved_at": datetime.now(UTC).isoformat(), "captured_at": datetime.now(UTC).isoformat()},
+        "demo": True,
+    }
+
+
+def keywords(pkg: str) -> list[dict[str, Any]]:
+    rows = [("loan emi", 64, 34.2, 7, 2), ("emi calculator", 65, 50.6, 3, 1), ("loan calculator", 65, 78.3, 18, -1),
+            ("finance calculator", 41, 36.0, 11, 4), ("interest calculator", 38, 29.5, 5, 0),
+            ("mortgage calculator", 52, 71.0, 24, -3)]
+    label = lambda d: "Easy" if d < 30 else "Medium" if d < 55 else "Hard" if d < 75 else "Very Hard"  # noqa: E731
+    return [{"keyword": k, "rank": r, "found": True, "volume": v, "difficulty": d, "difficulty_label": label(d),
+             "rank_change": c} for k, v, d, r, c in rows]
+
+
+def _experiment_view(doc: dict[str, Any], detail: bool = False) -> dict[str, Any]:
+    """Map a Firestore experiment document onto the dashboard's Experiment shape."""
+    status = doc.get("status", "proposed")
+    base = doc.get("baseline_value")
+    result = doc.get("result_value")
+    created = doc.get("created_at") or datetime.now(UTC).isoformat()
+    view: dict[str, Any] = {
+        "id": doc["id"], "app_package": doc.get("app_package"), "experiment_type": doc.get("experiment_type"),
+        "hypothesis": doc.get("hypothesis"), "status": status, "success_metric": doc.get("success_metric"),
+        "baseline_value": base, "result_value": result, "confidence": doc.get("confidence"),
+        "result_verdict": doc.get("result_verdict"), "autonomy_mode": "recommend_only",
+        "effective_autonomy_mode": "recommend_only", "min_observation_days": 7,
+        "days_active": 21 if status == "concluded" else 6 if status == "active" else 0,
+        "created_at": created, "updated_at": doc.get("updated_at") or created,
+        "provenance": {"source": "firestore", "is_live": True, "captured_at": doc.get("updated_at") or created},
+        "evidence": [{"label": "Store conversion vs benchmark", "value": "26.4% vs 31.0%", "source": "demo_sample"}],
+        "available_actions": [], "action_links": [], "requires_review": status == "proposed",
+    }
+    if base and result:
+        view["change_pct"] = round((result - base) / base * 100, 1)
+    if detail:
+        if status in ("concluded", "active") and base:
+            top = result or base * 1.06
+            view["observations"] = [
+                {"id": i, "experiment_id": doc["id"], "observed_at": (date.today() - timedelta(days=20 - i * 4)).isoformat(),
+                 "metric_value": round(base + (top - base) * i / 5, 4), "source": "demo_sample", "sample_size": 1500 + i * 400}
+                for i in range(6 if status == "concluded" else 3)
+            ]
+        if status == "concluded":
+            view["evaluation"] = {
+                "verdict": "win", "confidence": doc.get("confidence"), "observed_change": view.get("change_pct"),
+                "treatment_rate": result, "observation_days": 21,
+                "reason": "Welch t-test on daily conversion: treatment beats baseline with 96% confidence.",
+                "evaluated_at": doc.get("updated_at"),
+            }
+    return view
+
+
 _APP_ROUTES: dict[str, Callable[[str], Any]] = {
     "funnel": funnel, "revenue": revenue, "storefront": storefront, "retention": retention,
-    "admob_timeline": admob_timeline, "reviews": reviews, "reviews/analysis": reviews_analysis,
+    "admob_timeline": admob_timeline, "reviews": reviews, "keywords": keywords, "reviews/analysis": reviews_analysis,
 }
-_APP_RE = re.compile(r"^/api/apps/([^/]+)/(funnel|revenue|storefront|retention|admob_timeline|reviews/analysis|reviews)/?$")
+_APP_RE = re.compile(r"^/api/apps/([^/]+)/(funnel|revenue|storefront|retention|admob_timeline|reviews/analysis|reviews|keywords)/?$")
 
 
 def demo_enabled() -> bool:
@@ -229,10 +294,65 @@ class DemoDataMiddleware(BaseHTTPMiddleware):
             payload = summary()
         elif path == "/api/system/status":
             payload = system_status()
+        elif path == "/api/system/safety":
+            now = datetime.now(UTC).isoformat()
+            payload = {"emergency_brake": "Armed", "crash_rate": 0.42, "crash_threshold": 1.0, "anr_rate": 0.19,
+                       "anr_threshold": 0.47, "last_scan": now,
+                       "provenance": {"source": "demo_sample", "captured_at": now, "is_live": False}, "demo": True}
+        elif path == "/api/experiments" or re.match(r"^/api/experiments/[^/]+$", path):
+            from funnel_engine import firestore_store
+
+            rows = firestore_store.list_experiments(request.query_params.get("app"), request.query_params.get("status"))
+            if rows is not None:
+                if path == "/api/experiments":
+                    payload = {"experiments": [_experiment_view(r) for r in rows]}
+                else:
+                    exp_id = path.rsplit("/", 1)[1]
+                    match = next((r for r in rows if r.get("id") == exp_id), None)
+                    if match is not None:
+                        payload = _experiment_view(match, detail=True)
         else:
+            lm = re.match(r"^/api/apps/([^/]+)/listing/[^/]+/?$", request.url.path)
+            if lm and lm.group(1) in APPS:
+                return JSONResponse(listing(lm.group(1)))
             m = _APP_RE.match(request.url.path)
             if m and m.group(1) in APPS:
                 payload = _APP_ROUTES[m.group(2)](m.group(1))
         if payload is None:
             return await call_next(request)
         return JSONResponse(payload)
+
+
+async def grounded_answer(package: str, question: str) -> str:
+    """Real Gemini answer (Antigravity SDK on Vertex AI) grounded in the sample data and live Firestore experiments."""
+    import json
+
+    from google.antigravity import Agent, LocalAgentConfig
+
+    from app_manager.vertex import llm_kwargs
+    from funnel_engine import firestore_store
+
+    app = APPS.get(package)
+    if app is None:
+        return "No sample data is available for this app."
+    context = {
+        "app": app["name"], "package": package, "funnel": funnel(package), "revenue": revenue(package),
+        "storefront": storefront(package), "reviews": reviews_analysis(package),
+        "experiments": firestore_store.list_experiments(package, None) or [],
+    }
+    config = LocalAgentConfig(
+        system_instructions=(
+            "You are the coordinator agent of an app-portfolio copilot. Answer only from the JSON context, "
+            "which is sample data for a public demo. Be concise (at most 5 sentences), name the primary bottleneck, "
+            "the estimated monthly impact and one recommended experiment. Do not ask follow-up questions and do not "
+            "mention missing tools."
+        ),
+        **llm_kwargs(),
+    )
+    prompt = f"Context JSON:\n{json.dumps(context, default=str)[:12000]}\n\nQuestion: {question}"
+    chunks: list[str] = []
+    async with Agent(config) as agent:
+        response = await agent.chat(prompt)
+        async for chunk in response:
+            chunks.append(chunk)
+    return "".join(chunks).strip()
